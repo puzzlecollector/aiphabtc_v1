@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-3">
+    <div class="row">
+        <div class="col-4">
+            <h4>login</h4>
+        </div>
+        <div class="col-8 text-right">
+            <span>
+                or <a href="{% url 'common:signup' %}">create an account</a>
+            </span>
+        </div>
+    </div>
+    <form method="post" class="post-form" action="{% url 'common:login' %}">
+        {% csrf_token %}
+        <!-- 로그인 성공 후 이동되는 URL -->
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include "form_errors.html" %}
+        <div class="form-group">
+            <label for="username"><strong>user ID</strong></label>
+            <input type="text" class="form-control" name="username" id="username" value="{{ form.username.value|default_if_none:'' }}">
+        </div>
+        <div class="form-group">
+            <label for="password"><strong>password</strong></label>
+            <input type="password" class="form-control" name="password" id="password" value="{{ form.password.value|default_if_none:'' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">login</button>
+    </form>
+</div>
+{% endblock %}
