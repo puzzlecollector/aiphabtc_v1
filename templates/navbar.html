@@ -9,14 +9,14 @@
         <ul class="navbar-nav">
             {% if user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="/">{{ user.username }}</a>
+                <a class="nav-link" href="/"><img src="{% static 'user_icon_simple.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">{{ user.username }}</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:logout' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">logout</a>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'common:login' %}">login</a>
+                <a class="nav-link" href="{% url 'common:login' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">login</a>
             </li>
             {% endif %}
         </ul>
