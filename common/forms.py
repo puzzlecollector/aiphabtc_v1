@@ -7,3 +7,7 @@ class UserForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email")
+
+# Adding new form for introduction
+class IntroForm(forms.Form):
+    intro = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': '여기에 한줄소개를 작성하세요'}))
