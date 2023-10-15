@@ -2,6 +2,23 @@
 {% load pybo_filter %}
 {% block content %}
 
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
+    }
+
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
+}
+
+</style>
+
 <!-- Sidebar -->
 <div class="col-md-2">
     <div class="list-group">
@@ -163,8 +180,6 @@
         });
     });
 </script>
-
-
 <div class="footer">
     <div class="container text-center">
         <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>
