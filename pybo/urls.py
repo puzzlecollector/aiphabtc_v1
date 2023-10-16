@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views
+from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views, indicator_views
 app_name = "pybo"
 
 urlpatterns = [
@@ -48,4 +48,7 @@ urlpatterns = [
     # free board
     path('free_board/',
          free_board_views.free_board_view, name='free_board'),
+    path('indicator_page/',
+         indicator_views.indicator_view, name='indicator_view'),
+
 ]

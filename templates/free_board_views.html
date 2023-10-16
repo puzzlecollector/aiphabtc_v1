@@ -10,17 +10,19 @@
     }
 
     .footer {
-        background-color: #f8f9fa; /* Color of the banner */
-        padding: 20px 0;
         position: fixed;
-        width: 100%;
         bottom: 0;
-        z-index: 1030;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
     }
 
-    .footer p {
-        margin: 0;
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
     }
+
 </style>
 
 <!-- Sidebar -->
@@ -30,7 +32,7 @@
         <a href="#" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
-        <a href="#" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
+        <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">대회</a>
     </div>
