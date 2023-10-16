@@ -96,6 +96,13 @@
 <div id="profile_base">
 
     <h3>{{ user.username }}의 계정</h3>
+    <p>프로필 이미지</p>
+    {% if user.profile.image %}
+        <img src="{{ user.profile.image.url }}" style="width: 300px; height: 300px; object-fit: cover; border-radius: 50%; margin-bottom: 20px;">
+    {% else %}
+        <p> 프로필 이미지가 없습니다. </p>
+    {% endif %}
+
     <label for="email" class="profile_label">이메일</label>
     <p id="email" class="profile_info mb-4">{{ user.email }}</p>
 

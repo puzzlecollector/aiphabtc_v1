@@ -109,21 +109,14 @@
         </li>
     </ul>
     <div id="profile_base">
-    <label for="email" class="profile_label">이메일</label>
-    <p id="email" class="profile_info mb-4">{{ user.email }}</p>
-
-    <label for="username" class="profile_label">유저 닉네임 (ID)</label>
-    <p id="username" class="profile_info mb-4">{{ user.username }}</p>
-
-    <form method="post" action="{% url 'common:settings_base' %}">
-        {% csrf_token %}
-        <label class="profile_label">한줄 소개</label>
-        <input type="text" name="intro" class="profile_input mb-4" placeholder="여기에 한줄소개를 작성하세요" value="{{ user.profile.intro }}">
-        <button type="submit">저장하기</button>
-    </form>
-
-
-</div>
+        <p>프로필 이미지 설정하기</p>
+        <form method="post" enctype="multipart/form-data" action="{% url 'common:settings_image' %}">
+            {% csrf_token %}
+            <label for="profile_picture" class="profile_label">이미지를 고르세요:</label>
+            <input type="file" name="profile_picture" id="profile_picture" class="profile_input" accept="image/*">
+            <button type="submit" class="profile_button">이미지 업로드하기</button>
+        </form>
+    </div>
 
 </div>
 {% endblock %}
