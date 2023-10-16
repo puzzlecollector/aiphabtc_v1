@@ -53,7 +53,6 @@ def fetch_ai_analysis(request):
         message = "과거 7일동안의 크립토 공포 탐욕 지수야: "
         message += ', '.join([str(item['value']) for item in data])
         message += "\n 해당 정보를 분석해서 비트코인 가격 추세에 어떤 영향을 미칠지 해석해줘."
-        # openai.api_key = "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"
         openai.api_key = settings.OPENAI_API_KEY
         response = openai.ChatCompletion.create(
             model="gpt-4",

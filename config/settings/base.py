@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+
+OPENAI_API_KEY = config('OPENAI_API_KEY')
+DEBUG = config('DEBUG', default=True, cast=bool)
+
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -134,4 +139,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', default='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')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', default='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')
