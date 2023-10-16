@@ -12,11 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
-
-OPENAI_API_KEY = config('OPENAI_API_KEY')
-DEBUG = config('DEBUG', default=True, cast=bool)
-
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
