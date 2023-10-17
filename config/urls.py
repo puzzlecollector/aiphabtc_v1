@@ -31,6 +31,8 @@ urlpatterns = [
          indicator_views.fetch_ai_analysis, name='fetch_ai_analysis'),
     path('fetch_ai_analysis_global/',
          indicator_views.fetch_ai_analysis_global, name='fetch_ai_analysis_global'),
+    path('fetch_ai_technical/',
+         indicator_views.fetch_ai_technical, name='fetch_ai_technical'),
 ]
 
 handler404 = 'common.views.page_not_found'

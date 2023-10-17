@@ -83,6 +83,7 @@
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">대회</a>
     </div>
@@ -91,6 +92,7 @@
 <div class="col-md-10">
 <div class="container my-3">
     <div style="text-align; center; margin-top: 50px">
+        <p style="text-align; center; margin-bottom: 50px">선물기반 비트코인 가격 정보를 제공합니다</p>
         <h3>크립토 공포 탐욕 지수</h3>
         <p>비트코인 및 기타 대형 암호화폐를 위한 과거 7일동안의 공포 탐욕 지수입니다 </p>
         <p></p><a href="https://alternative.me/crypto/fear-and-greed-index/">[참고]</a></p>
@@ -115,7 +117,7 @@
     </table>
     <div style="text-align: left; margin-top: 30px">
         <button id="fetchAIResponse" class="btn btn-primary">AI 분석 보기</button>
-        <div id="loading" style="display:none;">AI가 분석중...</div>
+        <div id="loading" style="display:none;">AI가 분석중... 시간이 조금 걸릴수도 있어요!</div>
         <p id="aiResponse">{{ chat_message }}</p>
     </div>
     <div style="text-align; center; margin-top: 50px">
@@ -153,7 +155,7 @@
     </table>
     <div style="text-align: left; margin-top: 30px; margin-bottom: 60px;">
         <button id="fetchGlobalAIResponse" class="btn btn-primary">AI 분석 보기</button>
-        <div id="globalLoading" style="display:none;">AI가 분석중...</div>
+        <div id="globalLoading" style="display:none;">AI가 분석중... 시간이 조금 걸릴수도 있어요!</div>
         <p id="globalAiResponse">{{ global_chat_message }}</p>
     </div>
     <h3 style="text-align: left; margin-bottom: 5px;">김프 데이터</h3>
@@ -175,6 +177,40 @@
             <p>BTC 김프 (비트겟/업비트 프리미엄): {{ kimchi_data.kp }}</p>
         </div>
 </div>
+    <!-- TradingView Widget BEGIN -->
+    <h3 style="text-align: left; margin-bottom: 5px; margin-top: 50px;">BTCUSDT 차트 데이터</h3>
+    <p>비트겟 BTCUSDT Perpetual 30분봉 차트 데이터입니다 </p>
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container" style="height:100%";width:100%>
+      <div id="tradingview_e98d4" style="height:calc(500px - 32px);width:100%"></div>
+      <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.widget(
+      {
+      "autosize": true,
+      "symbol": "BITGET:BTCUSDT.P",
+      "interval": "30",
+      "timezone": "Etc/UTC",
+      "theme": "light",
+      "style": "1",
+      "locale": "en",
+      "enable_publishing": false,
+      "allow_symbol_change": true,
+      "studies": [
+        "STD;RSI"
+      ],
+      "container_id": "tradingview_e98d4"
+    }
+      );
+      </script>
+    </div>
+    <!-- TradingView Widget END -->
+    <div style="text-align: left; margin-top: 30px; margin-bottom: 60px;">
+        <button id="fetchTechnicalAIResponse" class="btn btn-primary">AI 분석 보기</button>
+        <div id="TechnicalLoading" style="display:none;">AI가 분석중... 시간이 조금 걸릴수도 있어요!</div>
+        <p id="TechnicalAiResponse">{{ technical_chat_message }}</p>
+    </div>
 
     </div>
 </div>
@@ -211,6 +247,20 @@
             .catch(error => {
                 console.error('Error fetching global AI analysis:', error);
                 document.getElementById("globalLoading").style.display = "none";
+            });
+    });
+
+    document.getElementById("fetchTechnicalAIResponse").addEventListener("click", function() {
+        document.getElementById("TechnicalLoading").style.display = "block";
+        fetch('/fetch_ai_technical/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("TechnicalAiResponse").innerText = data.chat_message;
+                document.getElementById("TechnicalLoading").style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error fetching technical AI analysis:', error);
+                document.getElementById("TechnicalLoading").style.display = "none";
             });
     });
 </script>
