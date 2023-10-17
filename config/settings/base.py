@@ -16,9 +16,9 @@ import os
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-from decouple import config
+#from decouple import config
 
-OPENAI_API_KEY = config('OPENAI_API_KEY')
+#OPENAI_API_KEY = config('OPENAI_API_KEY')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -139,3 +139,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+OPENAI_API_KEY = "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"
