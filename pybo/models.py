@@ -1,9 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
+class Board(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    def __str__(self):
+        return self.name
 
 class Question(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author_question')
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='freeboard_questions', null=True)
     subject = models.CharField(max_length=200)
     content = models.TextField()
     create_date = models.DateTimeField()

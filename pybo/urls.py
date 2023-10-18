@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views, indicator_views, profile_click_views
+from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views, indicator_views, profile_click_views, component_views
 app_name = "pybo"
 
 urlpatterns = [
@@ -10,8 +10,10 @@ urlpatterns = [
          base_views.detail, name='detail'),
 
     # question_views.py
-    path('question/create/',
-         question_views.question_create, name='question_create'),
+    #path('question/create/',
+    #     question_views.question_create, name='question_create'),
+    path('question/create/<str:board_name>/',
+         question_views.question_create, name="question_create"),
     path('question/modify/<int:question_id>/',
          question_views.question_modify, name='question_modify'),
     path('question/delete/<int:question_id>/',
@@ -55,4 +57,7 @@ urlpatterns = [
     path('profile/<int:user_id>/',
          profile_click_views.profile_detail, name='profile_detail'),
 
+    # view other components
+    path('board/<str:board_name>/',
+         base_views.index, name='board_view'),
 ]

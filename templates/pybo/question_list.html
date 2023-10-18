@@ -22,8 +22,8 @@
 <!-- Sidebar -->
 <div class="col-md-2">
     <div class="list-group">
-        <a href="#" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
-        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
+        <a href="{% url 'pybo:board_view' 'perceptive' %}" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
+        <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
         <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
@@ -149,7 +149,7 @@
         {% endif %}
     </ul>
     <!-- 페이징 처리 끝 -->
-    <a href="{% url 'pybo:question_create' %}" class="btn btn-primary">
+    <a href="{% url 'pybo:question_create' board_name=board_name|default:'perceptive' %}" class="btn btn-primary">
         관점 등록하기
     </a>
 </div>

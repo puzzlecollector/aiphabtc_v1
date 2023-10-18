@@ -3,7 +3,7 @@ from pybo.models import Question, Answer, Comment
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ["subject", "content"]
+        fields = ["subject", "content"]  # Removed "board" here
         labels = {
             "subject": "제목",
             "content": "내용",
