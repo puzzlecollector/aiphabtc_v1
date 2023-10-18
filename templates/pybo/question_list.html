@@ -88,7 +88,7 @@
                 </span>
                 {% endif %}
             </td>
-            <td>{{ question.author.username }}</td> <!-- 글쓴이 추가 -->
+            <td><a href="{% url 'pybo:profile_detail' question.author.id %}">{{ question.author.username }}</a></td> <!-- 글쓴이 추가 -->
             <td>{{ question.create_date }}</td>
         </tr>
         {% endfor %}
