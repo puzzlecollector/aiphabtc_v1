@@ -80,8 +80,8 @@
     <div class="list-group">
         <a href="/" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
         <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
-        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
-        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
+        <a href="{% url 'pybo:board_view' 'technical_blog' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
+        <a href="{% url 'pybo:board_view' 'trading_blog' %}" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
         <a href="#" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
@@ -92,6 +92,7 @@
 <div class="col-md-10">
 <div class="container my-3">
     <div style="text-align; center; margin-top: 50px">
+        <h2>기술 지표 페이지</h2>
         <p style="text-align; center; margin-bottom: 50px">선물기반 비트코인 가격 정보를 제공합니다</p>
         <h3>크립토 공포 탐욕 지수</h3>
         <p>비트코인 및 기타 대형 암호화폐를 위한 과거 7일동안의 공포 탐욕 지수입니다 </p>

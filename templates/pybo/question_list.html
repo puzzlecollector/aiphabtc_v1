@@ -24,8 +24,8 @@
     <div class="list-group">
         <a href="{% url 'pybo:board_view' 'perceptive' %}" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
         <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
-        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
-        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">트레이더의 관점</a>
+        <a href="{% url 'pybo:board_view' 'technical_blog' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
+        <a href="{% url 'pybo:board_view' 'trading_blog' %}" class="list-group-item list-group-item-action sidebar-item">트레이딩 블로그</a>
         <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
@@ -35,6 +35,17 @@
 
 <div class="col-md-10">
 <div class="container my-3">
+    {% if board_name == "perceptive" %}
+    <h2>관점공유 게시판</h2>
+    {% elif board_name == "free_board" %}
+    <h2>자유게시판</h2>
+    {% elif board_name == "technical_blog" %}
+    <h2>기술 블로그</h2>
+    {% elif board_name == "trading_blog" %}
+    <h2>트레이딩 블로그</h2>
+    {% else %}
+    <h2></h2>
+    {% endif %}
     <div class="row justify-content-between my-3">
         <div class="col-2">
             <select class="form-control so">
