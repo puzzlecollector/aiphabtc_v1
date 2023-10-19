@@ -2,6 +2,16 @@
 {% block content %}
 <div class="container">
     <h5 class="my-3 border-bottom pb-2"> 게시글 등록 </h5>
+    <!-- Messages display start -->
+    {% if messages %}
+        <div class="alert alert-info" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <!-- Messages display end -->
+
     <form method="post" class="post-form my-3">
         {% csrf_token %}
         <!-- 오류 표시 start -->
@@ -27,21 +37,59 @@
             </textarea>
             <p>Word Count: <span id="wordCount">0</span></p>
         </div>
+
+        {% if is_perceptive_board %}
+            <div class="form-group">
+                <label for="crypto">Crypto</label>
+                <select class="form-control" name="crypto" id="crypto" required>
+                    <option value="">Choose...</option>
+                    <option value="BTC">BTC</option>
+                    <option value="ETH">ETH</option>
+                    <!-- Add other crypto options here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration</label>
+                <select class="form-control" name="duration" id="duration" required>
+                    <option value="">Choose...</option>
+                    <option value="4 hours">4 hours</option>
+                    <option value="12 hours">12 hours</option>
+                    <option value="24 hours">24 hours</option>
+                    <option value="one week">one week</option>
+                    <option value="one month">one month</option>
+                    <option value="one year">one year</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="direction">Direction</label>
+                <select class="form-control" name="direction" id="direction" required>
+                    <option value="">Choose...</option>
+                    <option value="bullish">bullish</option>
+                    <option value="bearish">bearish</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="price_change">Price Change</label>
+                <input type="text" class="form-control" name="price_change" id="price_change" placeholder="e.g. +5%, -3%" required>
+            </div>
+        {% endif %}
+
         <button type="submit" class="btn btn-primary"> 저장하기 </button>
     </form>
 </div>
+{% endblock %}
 
 {% block script %}
 <script>
-document.getElementById('content').addEventListener('input', function(e) {
-    var text = e.target.value;
-    // Remove leading/trailing whitespaces and split the string by spaces
-    var words = text.trim().split(/\s+/);
-    // Update word count
-    document.getElementById('wordCount').innerText = words.length;
-});
+    document.getElementById('content').addEventListener('input', function(e) {
+        var text = e.target.value;
+        // Remove leading/trailing whitespaces and split the string by spaces
+        var words = text.trim().split(/\s+/);
+        // Update word count
+        document.getElementById('wordCount').innerText = words.length;
+    });
 </script>
 {% endblock script %}
 
 
-{% endblock %}
+

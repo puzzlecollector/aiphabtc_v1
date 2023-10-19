@@ -57,7 +57,9 @@
                     </div>
                     {% if request.user == question.author %}
                     <div class="my-3">
+                        {% if question.board.name != 'perceptive' %}
                         <a href="{% url 'pybo:question_modify' question.id %}" class="btn btn-sm btn-outline-secondary">edit</a>
+                        {% endif %}
                         <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'pybo:question_delete' question.id %}">delete</a>
                     </div>
                     {% endif %}
