@@ -85,7 +85,7 @@ def page_not_found(request, exception):
 def ranking(request):
     user_list = Profile.objects.order_by('-score')
     page = request.GET.get('page', 1)
-    paginator = Paginator(user_list, 10)  # Show 10 profiles per page
+    paginator = Paginator(user_list, 20)  # Show 20 profiles per page
 
     try:
         profiles = paginator.page(page)
@@ -95,3 +95,6 @@ def ranking(request):
         profiles = paginator.page(paginator.num_pages)
 
     return render(request, 'common/ranking.html', {'profiles': profiles})
+
+def point_policy(request):
+    return render(request, 'common/point_policy.html', {})

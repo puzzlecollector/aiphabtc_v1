@@ -21,4 +21,7 @@ urlpatterns = [
 
     # ranking page
     path('ranking/', views.ranking, name='ranking'),
+
+    # point policy page
+    path("point_policy/", views.point_policy, name="point_policy"),
 ]

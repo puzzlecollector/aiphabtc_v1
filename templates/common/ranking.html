@@ -1,8 +1,41 @@
 {% extends 'base.html' %}
-
+{% load pybo_filter %}
 {% block content %}
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
+    }
+
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
+    }
+
+</style>
+
+<!-- Sidebar -->
+<div class="col-md-2">
+    <div class="list-group">
+        <a href="{% url 'pybo:board_view' 'perceptive' %}" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
+        <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
+        <a href="{% url 'pybo:board_view' 'technical_blog' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
+        <a href="{% url 'pybo:board_view' 'trading_blog' %}" class="list-group-item list-group-item-action sidebar-item">트레이딩 블로그</a>
+        <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">대회</a>
+    </div>
+</div>
+
 <div class="col-md-10">
+  <div class="container my-3">
   <h2>User Ranking</h2>
+  <h6><a href="{% url 'common:point_policy' %}">포인트 정책</a></h6>
   <div class="card">
     <div class="card-body">
       <table class="table table-hover">
@@ -52,5 +85,13 @@
       </ul>
     </div>
   </div>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+<div class="footer">
+    <div class="container text-center">
+        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>
+    </div>
 </div>
 {% endblock %}

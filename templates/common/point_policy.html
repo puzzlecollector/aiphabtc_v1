@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load pybo_filter %}
+{% block content %}
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
+    }
+
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
+    }
+
+    .card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        color: #4CAF50;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+    }
+    p {
+        font-size: 1.2em;
+        color: #666666;
+        margin: 0 0 10px;
+    }
+    .list {
+        list-style: none;
+        padding: 0;
+    }
+    .list li {
+        margin-bottom: 10px;
+        font-size: 1.2em;
+    }
+    .score {
+        font-weight: 700;
+        color: #4CAF50;
+    }
+</style>
+
+<!-- Sidebar -->
+<div class="col-md-2">
+    <div class="list-group">
+        <a href="{% url 'pybo:board_view' 'perceptive' %}" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
+        <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
+        <a href="{% url 'pybo:board_view' 'technical_blog' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
+        <a href="{% url 'pybo:board_view' 'trading_blog' %}" class="list-group-item list-group-item-action sidebar-item">트레이딩 블로그</a>
+        <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">투자봇 페이지</a>
+        <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">대회</a>
+    </div>
+</div>
+
+<div class="col-md-10">
+  <div class="container my-3">
+    <div class="card">
+        <small><a href="{% url 'common:ranking' %}">Back to user ranking</a></small>
+        <h2>포인트 정책</h2>
+        <ul class="list">
+            <li>관점공유 게시판에 글을 작성하면 <span class="score">5점</span>이 부여됩니다.</li>
+            <li>자유게시판, 기술 블로그, 트레이딩 블로그에 글을 작성하면 <span class="score">3점</span>이 부여됩니다.</li>
+            <li>관점공유 게시판에 답글을 작성하면 <span class="score">4점</span>이 부여됩니다.</li>
+            <li>자유게시판, 기술 블로그, 트레이딩 블로그에 답글을 작성하면 <span class="score">2점</span>이 부여됩니다.</li>
+            <li>댓글을 작성하면 <span class="score">1점</span>이 부여됩니다.</li>
+            <li>좋아요를 받으면 <span class="score">2점</span>이 부여됩니다.</li>
+            <li>좋아요를 주면 <span class="score">1점</span>이 부여됩니다.</li>
+        </ul>
+    </div>
+    <div class="card">
+        <h2>티어 시스템</h2>
+        <ul class="list">
+            <li><img src="{% static 'beginner.png' %}" alt="beginner" style="width:20px; vertical-align: middle;">Beginner: 알파비트에 가입하고 참여를 많이 하지 않은 유저들에게 부여됩니다.</li>
+            <li><img src="{% static 'bronze.png' %}" alt="bronze" style="width:20px; vertical-align: middle;">Bronze: 상위 10%의 유저들에게 부여됩니다.</li>
+            <li><img src="{% static 'silver.png' %}" alt="silver" style="width:20px; vertical-align: middle;">Silver: 상위 5%의 유저들에게 부여됩니다.</li>
+            <li><img src="{% static 'gold.png' %}" alt="gold" style="width:20px; vertical-align: middle;">Gold: 상위 1%의 유저들에게 부여됩니다.</li>
+            <li><img src="{% static 'challenger.png' %}" alt="challenger" style="width:20px; vertical-align: middle;">Challenger: 상위 0.1%의 유저들에게 부여됩니다.</li>
+            <li><img src="{% static 'grandmaster.png' %}" alt="grandmaster" style="width:20px; vertical-align: middle;">Grandmaster: 상위 0.01%의 유저들에게 부여됩니다.</li>
+        </ul>
+    </div>
+
+
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+<div class="footer">
+    <div class="container text-center">
+        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>
+    </div>
+</div>
+{% endblock %}
