@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 
 from ..models import Question, Answer
+from common.models import Profile
 
 @login_required(login_url='common:login')
 def vote_question(request, question_id):
@@ -11,6 +12,15 @@ def vote_question(request, question_id):
         messages.error(request, '본인의 글은 추천할 수 없어요!')
     else:
         question.voter.add(request.user)
+        # Update scores
+        author_profile = question.author.profile
+        author_profile.score += 1  # author receives 2 points for a like
+        author_profile.save()
+
+        user_profile = request.user.profile
+        user_profile.score += 1  # user gives 1 point for a like
+        user_profile.save()
+
     return redirect('pybo:detail', question_id=question.id)
 
 @login_required(login_url='common:login')
@@ -20,4 +30,13 @@ def vote_answer(request, answer_id):
         messages.error(request, '본인이 작성한 글은 추천할 수 없습니다.')
     else:
         answer.voter.add(request.user)
+        # Update scores
+        author_profile = answer.author.profile
+        author_profile.score += 1  # author receives 2 points for a like
+        author_profile.save()
+
+        user_profile = request.user.profile
+        user_profile.score += 1  # user gives 1 point for a like
+        user_profile.save()
+
     return redirect('pybo:detail', question_id=answer.question.id)

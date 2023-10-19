@@ -18,4 +18,7 @@ urlpatterns = [
 
     # account page
     path("account_page/", views.account_page, name="account_page"),
+
+    # ranking page
+    path('ranking/', views.ranking, name='ranking'),
 ]

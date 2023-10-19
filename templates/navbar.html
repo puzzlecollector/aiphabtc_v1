@@ -17,9 +17,15 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:logout' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">logout</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'common:ranking' %}"><img src="{% static 'ranking.png' %}" alt="Ranking" style="width:20px; vertical-align: middle;">ranking</a>
+            </li>
             {% else %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:login' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'common:ranking' %}"><img src="{% static 'ranking.png' %}" alt="Ranking" style="width:20px; vertical-align: middle;">ranking</a>
             </li>
             {% endif %}
         </ul>

@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required(login_url='common:login')
 def base(request):
@@ -80,3 +81,17 @@ def signup(request):
 
 def page_not_found(request, exception):
     return render(request, 'common/404.html', {})
+
+def ranking(request):
+    user_list = Profile.objects.order_by('-score')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(user_list, 10)  # Show 10 profiles per page
+
+    try:
+        profiles = paginator.page(page)
+    except PageNotAnInteger:
+        profiles = paginator.page(1)
+    except EmptyPage:
+        profiles = paginator.page(paginator.num_pages)
+
+    return render(request, 'common/ranking.html', {'profiles': profiles})

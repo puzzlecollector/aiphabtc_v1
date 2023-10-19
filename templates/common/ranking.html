@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-10">
+  <h2>User Ranking</h2>
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">User</th>
+            <th scope="col">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+            <tr>
+              <td>{{ forloop.counter0|add:profiles.start_index }}</td>
+              <td><a href="{% url 'pybo:profile_detail' profile.user.id %}">{{ profile.user.username }}</a></td>
+              <td>{{ profile.score }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <ul class="pagination justify-content-center">
+        {% if profiles.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ profiles.previous_page_number }}">Previous</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">이전</span></li>
+        {% endif %}
+
+        {% for i in profiles.paginator.page_range %}
+          {% if profiles.number == i %}
+            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if profiles.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ profiles.next_page_number }}">Next</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ profiles.paginator.num_pages }}">&raquo;</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">다음</span></li>
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
