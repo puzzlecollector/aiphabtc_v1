@@ -64,10 +64,10 @@ def question_create(request, board_name=None):
                         messages.error(request,
                                        '해당 코인에 대해서 이 기간 동안 이전 예측이 끝나기 전까지 다른 예측을 게시할 수 없습니다!')
                         return redirect('pybo:question_create', board_name=board_name)
-                else:
-                    subject = f"[{crypto}][{duration}][{direction}][{price_change}] {subject}"
-                    question.subject = subject
-                    question.content = content
+                    else:
+                        subject = f"[{crypto}][{duration}][{direction}][{price_change}] {subject}"
+                        question.subject = subject
+                        question.content = content
             elif board_name == "technical_blog" or board_name == "trading_blog":
                 word_count = len(content.split())
                 if word_count < 55:
