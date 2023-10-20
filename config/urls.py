@@ -19,7 +19,7 @@ from django.urls import path, include
 from pybo.views import base_views
 from django.conf import settings
 from django.conf.urls.static import static
-from pybo.views import indicator_views
+from pybo.views import indicator_views, ai_indicator_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,6 +33,8 @@ urlpatterns = [
          indicator_views.fetch_ai_analysis_global, name='fetch_ai_analysis_global'),
     path('fetch_ai_technical/',
          indicator_views.fetch_ai_technical, name='fetch_ai_technical'),
+    path('fetch_ai_corr/',
+         ai_indicator_views.fetch_ai_corr, name='fetch_ai_corr')
 ]
 
 handler404 = 'common.views.page_not_found'
