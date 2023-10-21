@@ -2,6 +2,7 @@
 {% load pybo_filter %}
 {% block content %}
 
+
 <style>
     .sidebar-item {
         border-bottom: 2px solid #000;  /* Only the bottom border */
@@ -45,7 +46,7 @@
     <div class="list-group">
         <a href="/" class="list-group-item list-group-item-action sidebar-item">관점공유 게시판</a>
         <a href="{% url 'pybo:board_view' 'free_board' %}" class="list-group-item list-group-item-action sidebar-item">자유게시판</a>
-        <a href="{% url 'pybo:board_view' 'technical_board' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
+        <a href="{% url 'pybo:board_view' 'technical_blog' %}" class="list-group-item list-group-item-action sidebar-item">기술 블로그</a>
         <a href="{% url 'pybo:board_view' 'trading_blog' %}" class="list-group-item list-group-item-action sidebar-item">트레이딩 블로그</a>
         <a href="{% url 'pybo:indicator_view' %}" class="list-group-item list-group-item-action sidebar-item">기술 지표 페이지</a>
         <a href="{% url 'pybo:free_board' %}" class="list-group-item list-group-item-action sidebar-item">AI 지표 페이지</a>
@@ -96,11 +97,23 @@
         <p id="CorrAIResponse">{{ corr_chat_message }}</p>
     </div>
 
+    <div style="text-align; center; margin-top: 50px">
+        <h2>시계열 예측 지표</h2>
+        <h6>다양한 시계열 예측 모델을 활용해서 30분봉 기준 미래 비트코인 선물 (BTC/USDT) 가격 예측을 시도해봅니다.</h6>
+    </div>
+    <canvas id="btcChart" width="400" height="200"></canvas>
+    <div style="text-align: left; margin-top: 50px">
+        <p><b>FB Prophet</b>: FB Prophet은 Facebook에서 개발한 시계열 데이터 예측 모델로, 계절성과 휴일, 이벤트 등의 특이점을 고려하여 미래의 값을 예측할 수 있습니다. 사용이 매우 간편하며, 복잡한 파라미터 조정 없이도 좋은 예측 결과를 얻을 수 있습니다. 매출 예측, 주식 가격 예측, 날씨 예측 등 다양한 분야에서 활용이 가능합니다.</p>
+        <p><b>ARIMA</b>: ARIMA 모델은 시계열 데이터의 트렌드와 계절성을 분석하여 미래 값을 예측하는 통계적 방법입니다. 이 모델은 과거의 데이터를 분석하여 데이터의 패턴을 찾아내고, 그 패턴을 바탕으로 미래의 값을 예측합니다. ARIMA 모델은 선형 모델로, 과거 데이터의 선형적 관계를 바탕으로 미래 값을 예측하며, 주식 가격, 매출 예측, 기상 예측 등 다양한 분야에서 활용됩니다.</p>
+    </div>
+
+
 </div>
 </div>
 
 {% endblock %}
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Added Chart.js library -->
 <script type="text/javascript">
     document.getElementById("fetchAICorrResponse").addEventListener("click", function() {
         document.getElementById("CorrLoading").style.display = "block";
@@ -115,6 +128,75 @@
                 document.getElementById("CorrLoading").style.display = "none";
             });
     });
+
+    fetch("/fetch_forecast/")
+    .then(response => response.json())
+    .then(data => {
+        var ctx = document.getElementById('btcChart').getContext('2d');
+        var btcChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                        label: 'Bitcoin Price',
+                        data: data.input_seq,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false,
+                    },
+                    {
+                        label: 'FB Prophet',
+                        data: data.prophet_forecast.map((point, i) => {
+                            return {
+                                x: data.labels[data.labels.length - data.prophet_forecast.length + i],
+                                y: point
+                            };
+                        }),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)', // this sets the color of the points
+                    },
+                    {
+                        label: 'ARIMA',
+                        data: data.arima_forecast.map((point, i) => {
+                            return {
+                                x: data.labels[data.labels.length - data.arima_forecast.length + i],
+                                y: point
+                            };
+                        }),
+                        borderColor: 'rgba(0, 128, 0, 1)',
+                        fill: false,
+                        pointBackgroundColor: 'rgba(0, 128, 0, 1)', // this sets the color of the points
+                    },
+                ],
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time',
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'USDT',
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                },
+            },
+        });
+    })
+    .catch(error => {
+        console.error("Error fetching forecast data:", error);
+    });
+
 </script>
 
 <div class="footer">

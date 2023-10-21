@@ -15,6 +15,10 @@ import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 from statsmodels.tsa.stattools import grangercausalitytests, coint
+from statsmodels.tsa.arima.model import ARIMA
+from pytz import timezone
+from prophet import Prophet
+
 
 def granger_causality_test(data, max_lag):
     test = 'ssr_chi2test'
@@ -101,3 +105,72 @@ def fetch_ai_corr(request):
     )
     chat_message = response["choices"][0]["message"]["content"]
     return JsonResponse({'chat_message': chat_message})
+
+
+def get_predictions_fbprophet(btc_sequence, timestamps):
+    df = pd.DataFrame({
+        'ds': timestamps,
+        'y': btc_sequence,
+    })
+    model = Prophet()
+    model.fit(df)
+    future = model.make_future_dataframe(periods=6, freq='30min')
+    forecast = model.predict(future)
+    yhat = forecast['yhat'].iloc[-6:].values
+    return yhat
+
+def get_predictions_arima(btc_sequence, p=1, d=1, q=1, steps_ahead=6):
+    try:
+        # Differencing
+        btc_diff = np.diff(btc_sequence, n=d)
+
+        # Fit ARIMA model
+        model = ARIMA(btc_diff, order=(p, 0, q))
+        fitted_model = model.fit()
+
+        # Forecast
+        forecast_diff = fitted_model.forecast(steps=steps_ahead)
+
+        # Invert differencing
+        forecast = [btc_sequence[-1]]
+        for diff in forecast_diff:
+            forecast.append(forecast[-1] + diff)
+
+        return forecast[1:]
+    except Exception as e:
+        print(f"Model fitting failed: {str(e)}")
+        return np.zeros((steps_ahead,))
+
+def time_series_views(request):
+    bitget = ccxt.bitget()
+    btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", "30m")
+    btc = pd.DataFrame(btcusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    btc_close = btc['close'].values
+
+    labels = [
+        datetime.utcfromtimestamp(t / 1000).replace(tzinfo=timezone('UTC')).astimezone(timezone('Asia/Seoul')).strftime(
+            '%Y-%m-%d %H:%M:%S') for t in btc['timestamp']]
+
+    # Get predictions
+    prophet_forecast = get_predictions_fbprophet(btc_close, labels)
+    arima_forecast = get_predictions_arima(btc_close)
+
+    # Append labels for forecast
+    last_label = labels[-1]
+    last_timestamp = datetime.strptime(last_label, '%Y-%m-%d %H:%M:%S')
+    interval = timedelta(minutes=30)
+
+    # Generate next 6 timestamps
+    new_labels = [last_timestamp + interval * i for i in range(1, 7)]
+    new_labels_str = [t.strftime('%Y-%m-%d %H:%M:%S') for t in new_labels]
+
+    # Append new labels to existing labels
+    labels.extend(new_labels_str)
+
+    context = {
+        "input_seq": list(btc_close[-30:]),
+        "prophet_forecast": list(prophet_forecast),
+        "arima_forecast": list(arima_forecast),
+        "labels": labels[-36:],
+    }
+    return JsonResponse(context)

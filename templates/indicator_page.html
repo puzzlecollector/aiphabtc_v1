@@ -154,11 +154,15 @@
         {% endfor %}
         </tbody>
     </table>
+    <!--
     <div style="text-align: left; margin-top: 30px; margin-bottom: 60px;">
         <button id="fetchGlobalAIResponse" class="btn btn-primary">AI 분석 보기</button>
         <div id="globalLoading" style="display:none;">AI가 분석중... 시간이 조금 걸릴수도 있어요!</div>
         <p id="globalAiResponse">{{ global_chat_message }}</p>
     </div>
+    -->
+    <br>
+    <br>
     <h3 style="text-align: left; margin-bottom: 5px;">김프 데이터</h3>
     <p>비트겟과 업비트에서 가져온 BTC 가격 정보로 계산된 수치입니다</p>
     <div class="data-container">
@@ -237,6 +241,7 @@
             });
     });
 
+    /*
     document.getElementById("fetchGlobalAIResponse").addEventListener("click", function() {
         document.getElementById("globalLoading").style.display = "block";
         fetch('/fetch_ai_analysis_global/')
@@ -250,6 +255,7 @@
                 document.getElementById("globalLoading").style.display = "none";
             });
     });
+    */
 
     document.getElementById("fetchTechnicalAIResponse").addEventListener("click", function() {
         document.getElementById("TechnicalLoading").style.display = "block";
