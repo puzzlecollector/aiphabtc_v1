@@ -68,6 +68,10 @@ def question_create(request, board_name=None):
                         subject = f"[{crypto}][{duration}][{direction}][{price_change}] {subject}"
                         question.subject = subject
                         question.content = content
+                else:
+                    subject = f"[{crypto}][{duration}][{direction}][{price_change}] {subject}"
+                    question.subject = subject
+                    question.content = content
             elif board_name == "technical_blog" or board_name == "trading_blog":
                 word_count = len(content.split())
                 if word_count < 55:
