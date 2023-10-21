@@ -98,6 +98,7 @@
         <p>비트코인 및 기타 대형 암호화폐를 위한 과거 7일동안의 공포 탐욕 지수입니다 </p>
         <p></p><a href="https://alternative.me/crypto/fear-and-greed-index/">[참고]</a></p>
     </div>
+    <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Latest Crypto Fear & Greed Index" width="300" height="300" />
     <table class="table">
         <thead>
             <tr>
@@ -116,10 +117,15 @@
         {% endfor %}
         </tbody>
     </table>
+    <!--
     <div style="text-align: left; margin-top: 30px">
         <button id="fetchAIResponse" class="btn btn-primary">AI 분석 보기</button>
         <div id="loading" style="display:none;">AI가 분석중... 시간이 조금 걸릴수도 있어요!</div>
         <p id="aiResponse">{{ chat_message }}</p>
+    </div>
+    -->
+    <div style="text-align; left; margin-top: 30px">
+        <p>크립토 공포와 탐욕 지수는 투자자들의 시장에 대한 감정을 나타내는 지표 중 하나로 사용됩니다. 이 지수는 0에서 100 사이의 값을 가지며, 0에 가까울수록 투자자들이 두려움을 느끼고 있음을, 100에 가까울수록 탐욕적임을 나타냅니다. 이 지수는 주로 시장의 극단적인 감정 상태를 포착해 반대 방향으로의 변화를 예측하는데 사용됩니다. 지수가 "탐욕"으로 옮겨가면 비트코인 가격이 오를 가능성이 있지만, 이는 또한 가격이 과열되어 조정을 받을 수 있는 시점에 접어들 수 있음을 의미합니다.</p>
     </div>
     <div style="text-align; center; margin-top: 50px">
         <h3>글로벌 크립토 시장 정보</h3>
@@ -227,6 +233,7 @@
 {% endblock %}
 {% block script %}
 <script type="text/javascript">
+    /*
     document.getElementById("fetchAIResponse").addEventListener("click", function() {
         document.getElementById("loading").style.display = "block";
         fetch('/fetch_ai_analysis/')  // assuming you create a new Django URL path for this AJAX call
@@ -240,6 +247,7 @@
                 document.getElementById("loading").style.display = "none";
             });
     });
+    */
 
     /*
     document.getElementById("fetchGlobalAIResponse").addEventListener("click", function() {
