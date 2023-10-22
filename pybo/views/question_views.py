@@ -51,7 +51,11 @@ def question_create(request, board_name=None):
                 ).order_by('-create_date').first()
                 if last_prediction:
                     duration_hours = {
+                        '1 hour': 1,
+                        '2 hours': 2,
                         '4 hours': 4,
+                        '6 hours': 6,
+                        '8 hours': 8,
                         '12 hours': 12,
                         '24 hours': 24,
                         'one week': 24 * 7,
