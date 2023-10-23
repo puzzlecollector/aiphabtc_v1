@@ -23,6 +23,24 @@
         padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
     }
 
+    <style>
+    /* ... (other styles) ... */
+
+    .probabilities {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        background-color: #f9f9f9;
+    }
+
+    .probability {
+        display: inline-block;
+        margin-right: 20px;
+    }
+</style>
+
+
 </style>
 
 <!-- Sidebar -->
@@ -40,11 +58,40 @@
 </div>
 
 <div class="col-md-10">
-<div class="container my-3">
-    <div style="text-align; center; margin-top: 50px">
-        <h3>비트코인 선물 트레이딩 봇 페이지</h3>
+    <div class="container my-3">
+        <div style="text-align; center; margin-top: 50px">
+            <h2>비트코인 선물 트레이딩 봇 페이지</h2>
+
+            <p><strong>AIPHABOT 예측 결과</strong></p>
+            <p><strong>예측 유효 시점 (KST)</strong>: {{ date_obj }} - {{ date_obj_end }}</p>
+            <p>long은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 상승할 확률, short은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 떨어질 확률, hold는 모델이 계산한 이후 4시간동안 0.75% 미만으로 가격이 변동할 확률입니다.</p>
+            <div class="probabilities">
+                <div class="probability">
+                    <strong>Long 확률:</strong> {{ long_prob|floatformat:2 }}%
+                </div>
+                <div class="probability">
+                    <strong>Short 확률:</strong> {{ short_prob|floatformat:2 }}%
+                </div>
+                <div class="probability">
+                    <strong>Hold 확률:</strong> {{ hold_prob|floatformat:2 }}%
+                </div>
+                <canvas id="myChart" width="300" height="300"></canvas>
+            </div>
+            <br>
+            <br>
+            <p><strong>CBITS 예측 결과</strong></p>
+            <p>coming soon!</p>
+            <br>
+            <br>
+            <p><strong>Bubble Detector 예측 결과</strong></p>
+            <p>coming soon!</p>
+            <br>
+            <br>
+            <p><strong>RL Bot 예측 결과</strong></p>
+            <p>coming soon!</p>
+
+        </div>
     </div>
-</div>
 </div>
 <form id="searchForm" method="get" action="{% url 'index' %}">
     <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
@@ -53,7 +100,33 @@
 </form>
 {% endblock %}
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript">
+        var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Long', 'Short', 'Hold'],
+            datasets: [{
+                data: [{{ long_prob }}, {{ short_prob }}, {{ hold_prob }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                ],
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: true,
+        },
+    });
 </script>
 
 <div class="footer">
