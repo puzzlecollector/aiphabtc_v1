@@ -61,10 +61,12 @@
     <div class="container my-3">
         <div style="text-align; center; margin-top: 50px">
             <h2>비트코인 선물 트레이딩 봇 페이지</h2>
-
+            <h6>알파비트 인공지능 팀이 지속적으로 연구 및 개발하고 있는 비트코인 선물 투자봇들입니다</h6>
+            <br>
+            <br>
             <p><strong>AIPHABOT 예측 결과</strong></p>
             <p><strong>예측 유효 시점 (KST)</strong>: {{ date_obj }} - {{ date_obj_end }}</p>
-            <p>long은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 상승할 확률, short은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 떨어질 확률, hold는 모델이 계산한 이후 4시간동안 0.75% 미만으로 가격이 변동할 확률입니다.</p>
+            <p>long은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 상승할 확률, short은 모델이 계산한 이후 4시간동안 0.75% 이상 가격이 떨어질 확률, hold는 모델이 계산한 이후 4시간동안 0.75% 미만으로 가격이 변동할 확률입니다. 현재는 가벼운 단일 XGBoost 모델로 구성되어 있으나 업데이트를 거치면서 더 강력한 AIPHABOT을 출시할 예정입니다. 모델 예측은 4시간마다 업데이트 됩니다.</p>
             <div class="probabilities">
                 <div class="probability">
                     <strong>Long 확률:</strong> {{ long_prob|floatformat:2 }}%
@@ -79,15 +81,15 @@
             </div>
             <br>
             <br>
-            <p><strong>CBITS 예측 결과</strong></p>
+            <p><strong>CBITS 예측 결과</strong>&nbsp;&nbsp;<a href="https://ieeexplore.ieee.org/document/10014986">[참고]</a></p>
             <p>coming soon!</p>
             <br>
             <br>
-            <p><strong>Bubble Detector 예측 결과</strong></p>
+            <p><strong>Bubble Detector 예측 결과</strong>&nbsp;&nbsp;<a href="https://aclanthology.org/2022.naacl-main.405.pdf">[참고]</a></p>
             <p>coming soon!</p>
             <br>
             <br>
-            <p><strong>RL Bot 예측 결과</strong></p>
+            <p><strong>RL Bot 예측 결과</strong>&nbsp;&nbsp;<a href="https://research.ibm.com/publications/reinforcement-learning-based-portfolio-management-with-augmented-asset-movement-prediction-states">[참고]</a></p>
             <p>coming soon!</p>
 
         </div>
