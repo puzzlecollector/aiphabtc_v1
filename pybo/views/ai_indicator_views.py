@@ -55,8 +55,8 @@ def get_correlations(x, y, max_lags=5):
 def indicator_view(request):
     # btc, eth
     bitget = ccxt.bitget()
-    btcusdt = bitget.fetch_ohlcv("BTC/USDT", "30m")
-    ethusdt = bitget.fetch_ohlcv("ETH/USDT", "30m")
+    btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", "1d")
+    ethusdt = bitget.fetch_ohlcv("ETH/USDT:USDT", "1d")
     btc = pd.DataFrame(btcusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     eth = pd.DataFrame(ethusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     btc_close = btc.close.values
@@ -65,9 +65,9 @@ def indicator_view(request):
 
     # btc, gold
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=7)
+    start_date = end_date - timedelta(days=300)
     gold_data = yf.download("GC=F", start=start_date.strftime("%Y-%m-%d"), end=end_date.strftime("%Y-%m-%d"),
-                            interval="30m")
+                            interval="1d")
     gold_close = gold_data["Close"].values[-200:]
     btc_gold_data = get_correlations(btc_close, gold_close)
 
@@ -82,8 +82,8 @@ def indicator_view(request):
 def fetch_ai_corr(request):
     # btc, eth
     bitget = ccxt.bitget()
-    btcusdt = bitget.fetch_ohlcv("BTC/USDT", "30m")
-    ethusdt = bitget.fetch_ohlcv("ETH/USDT", "30m")
+    btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", "1d")
+    ethusdt = bitget.fetch_ohlcv("ETH/USDT:USDT", "1d")
     btc = pd.DataFrame(btcusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     eth = pd.DataFrame(ethusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     btc_close = btc.close.values
@@ -92,9 +92,9 @@ def fetch_ai_corr(request):
 
     # btc, gold
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=7)
+    start_date = end_date - timedelta(days=300)
     gold_data = yf.download("GC=F", start=start_date.strftime("%Y-%m-%d"), end=end_date.strftime("%Y-%m-%d"),
-                            interval="30m")
+                            interval="1d")
     gold_close = gold_data["Close"].values[-200:]
     btc_gold_data = get_correlations(btc_close, gold_close)
 
