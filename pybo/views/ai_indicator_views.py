@@ -26,11 +26,20 @@ def granger_causality_test(data, max_lag):
     p_values = [round(result[i + 1][0][test][1], 4) for i in range(max_lag)]
     return p_values
 
+def align_lengths(x, y):
+    max_len = max(len(x), len(y))
+    x_series = pd.Series(x)
+    y_series = pd.Series(y)
+    x_filled = x_series.reindex(range(max_len), method='ffill').to_numpy()
+    y_filled = y_series.reindex(range(max_len), method='ffill').to_numpy()
+    return x_filled, y_filled
+
 def get_correlations(x, y, max_lags=5):
-    pearson_corr, _ = pearsonr(x, y)
-    spearman_corr, _ = spearmanr(x, y)
-    x_ = np.array(x).reshape(-1, 1)
-    y_ = np.array(y).reshape(-1, 1)
+    x_aligned, y_aligned = align_lengths(x, y)
+    pearson_corr, _ = pearsonr(x_aligned, y_aligned)
+    spearman_corr, _ = spearmanr(x_aligned, y_aligned)
+    x_ = np.array(x_aligned).reshape(-1, 1)
+    y_ = np.array(y_aligned).reshape(-1, 1)
     data = np.hstack((x_, y_))
     granger_p_values = granger_causality_test(data, max_lags)
     coint_test = coint(x_, y_)
@@ -41,7 +50,6 @@ def get_correlations(x, y, max_lags=5):
     data["granger"] = granger_p_values
     data["coint"] = coint_p_values
     return data
-
 
 
 def indicator_view(request):
