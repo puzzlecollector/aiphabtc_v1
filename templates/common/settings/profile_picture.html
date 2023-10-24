@@ -102,10 +102,10 @@
             <a class="nav-link" href="{% url 'common:settings_base' %}">기본정보</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'common:settings_image' %}">프로필 이미지</a>
+            <a class="nav-link active" href="{% url 'common:settings_image' %}">프로필 이미지</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#change-password">비밀번호 변경</a>
+            <a class="nav-link" href="{% url 'common:password_reset' %}">비밀번호 변경</a>
         </li>
     </ul>
     <div id="profile_base">

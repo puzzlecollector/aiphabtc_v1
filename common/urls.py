@@ -15,6 +15,7 @@ urlpatterns = [
     # path("settings/password_change/", settings_views.PasswordChangeView.as_view(), name="password_change),
     path("settings/image/", views.profile_modify_image, name="settings_image"),
     # path("settings/image/delete/", settings_views.profile_image_delete, name="settings_image_delete"),
+    path('settings/password_reset/', views.password_reset, name='password_reset'),
 
     # account page
     path("account_page/", views.account_page, name="account_page"),

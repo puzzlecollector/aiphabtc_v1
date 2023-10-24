@@ -7,6 +7,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from common.forms import CustomPasswordChangeForm
 
 @login_required(login_url='common:login')
 def base(request):
@@ -98,3 +102,15 @@ def ranking(request):
 
 def point_policy(request):
     return render(request, 'common/point_policy.html', {})
+
+@login_required(login_url="common:login")
+def password_reset(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '비밀번호가 정상적으로 변경되었습니다.')
+            return redirect('common:settings_base')
+    else:
+        form = CustomPasswordChangeForm(request.user)
+    return render(request, 'common/settings/password_reset.html', {'form': form})
