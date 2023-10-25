@@ -25,4 +25,7 @@ urlpatterns = [
 
     # point policy page
     path("point_policy/", views.point_policy, name="point_policy"),
+
+    # attendance page
+    path('attendance/', views.attendance, name='attendance'),
 ]

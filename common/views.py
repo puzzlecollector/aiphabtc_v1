@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from common.forms import UserForm, IntroForm
-from common.models import Profile
+from common.models import Profile, Attendance
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from common.forms import CustomPasswordChangeForm
+from django.utils import timezone
+from datetime import timedelta
 
 @login_required(login_url='common:login')
 def base(request):
@@ -114,3 +116,34 @@ def password_reset(request):
     else:
         form = CustomPasswordChangeForm(request.user)
     return render(request, 'common/settings/password_reset.html', {'form': form})
+
+from django.utils import timezone
+from datetime import timedelta
+
+@login_required(login_url='common:login')
+def attendance(request):
+    user = request.user
+    now = timezone.now()
+
+    # Check if the user has already attended today
+    attended_today = user.attendances.filter(timestamp__date=now.date()).exists()
+
+    # Check the number of attendances in the last 30 days
+    attendances_last_month = user.attendances.filter(timestamp__gte=now - timedelta(days=30)).count()
+
+    if request.method == "POST" and not attended_today and attendances_last_month < 25:
+        Attendance.objects.create(user=user)
+        # Give the user 2 tokens (update your logic accordingly)
+        user.profile.tokens += 2
+        user.profile.save()
+        messages.success(request, '출석체크 완료! 2 토큰을 받았습니다.')
+        return redirect('common:attendance')
+
+    context = {
+        'attended_today': attended_today,
+        'attendances_last_month': attendances_last_month,
+        'tokens': user.profile.tokens,
+    }
+    return render(request, 'common/attendance.html', context)
+
+

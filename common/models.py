@@ -4,12 +4,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pybo.models import Question, Answer, Comment
 
+class Attendance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attendances")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ["-timestamp"]
+
 # Create your models here.
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     intro = models.CharField(max_length=300, blank=True, null=True, verbose_name="한줄소개")
     image = models.ImageField(upload_to="profile_images/", null=True, blank=True)
     score = models.PositiveIntegerField(default=0)
+    tokens = models.PositiveIntegerField(default=0)
 
     def calculate_score(self):
         score = 0

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="col-md-10">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">출석체크</h1>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>이번 달 출석체크 횟수: {{ attendances_last_month }}/25</h5>
+            </div>
+            <div class="mb-3">
+                <h5>보유 토큰 개수: {{ tokens }} APB</h5>
+            </div>
+            <div class="mb-3">
+                <form method="post" action="{% url 'common:attendance' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg" {% if attended_today %}disabled{% endif %}>출석체크</button>
+                </form>
+                {% if attended_today %}
+                    <p class="text-muted mt-2">오늘은 이미 출석체크를 하셨습니다. 내일 다시 시도해주세요.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .btn-primary {
+        background-color: #218838;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #1e7a31;
+    }
+    .btn-primary:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
+{% endblock %}
