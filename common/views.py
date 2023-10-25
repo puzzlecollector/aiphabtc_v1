@@ -13,6 +13,8 @@ from django.contrib import messages
 from common.forms import CustomPasswordChangeForm
 from django.utils import timezone
 from datetime import timedelta
+from django.utils.timezone import localtime
+
 
 @login_required(login_url='common:login')
 def base(request):
@@ -143,16 +145,15 @@ def password_reset(request):
         form = CustomPasswordChangeForm(request.user)
     return render(request, 'common/settings/password_reset.html', {'form': form})
 
-from django.utils import timezone
-from datetime import timedelta
 
 @login_required(login_url='common:login')
 def attendance(request):
     user = request.user
     now = timezone.now()
+    local_now = localtime(now)  # Convert to local timezone
 
     # Check if the user has already attended today
-    attended_today = user.attendances.filter(timestamp__date=now.date()).exists()
+    attended_today = user.attendances.filter(timestamp__date=local_now.date()).exists()
 
     # Check the number of attendances in the last 30 days
     attendances_last_month = user.attendances.filter(timestamp__gte=now - timedelta(days=30)).count()
@@ -169,7 +170,7 @@ def attendance(request):
         'attended_today': attended_today,
         'attendances_last_month': attendances_last_month,
         'tokens': user.profile.tokens,
+        'now': local_now,  # Pass local datetime to the template
     }
     return render(request, 'common/attendance.html', context)
-
 
