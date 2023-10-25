@@ -88,10 +88,26 @@ def signup(request):
 def page_not_found(request, exception):
     return render(request, 'common/404.html', {})
 
+def get_tier(rank, total_users):
+    percentile = (rank / total_users) * 100
+    if percentile <= 0.01:
+        return 'grandmaster', 'grandmaster.png'
+    elif percentile <= 0.1:
+        return 'challenger', 'challenger.png'
+    elif percentile <= 1:
+        return 'gold', 'gold.png'
+    elif percentile <= 10:
+        return 'silver', 'silver.png'
+    elif percentile <= 20:
+        return 'bronze', 'bronze.png'
+    else:
+        return 'beginner', 'beginner.png'
+
 def ranking(request):
     user_list = Profile.objects.order_by('-score')
+    total_users = user_list.count()
     page = request.GET.get('page', 1)
-    paginator = Paginator(user_list, 20)  # Show 20 profiles per page
+    paginator = Paginator(user_list, 20)
 
     try:
         profiles = paginator.page(page)
@@ -100,7 +116,17 @@ def ranking(request):
     except EmptyPage:
         profiles = paginator.page(paginator.num_pages)
 
-    return render(request, 'common/ranking.html', {'profiles': profiles})
+    profile_list_with_tier = []
+    for index, profile in enumerate(user_list):
+        rank = index + 1
+        tier, icon = get_tier(rank, total_users)
+        if profile in profiles.object_list:
+            profile_list_with_tier.append((profile, rank, tier, icon))
+
+    context = {
+        'profile_list_with_tier': profile_list_with_tier,
+    }
+    return render(request, 'common/ranking.html', context)
 
 def point_policy(request):
     return render(request, 'common/point_policy.html', {})

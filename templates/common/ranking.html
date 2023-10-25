@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load pybo_filter %}
 {% block content %}
+{% load static %}
 <style>
     .footer {
         position: fixed;
@@ -16,6 +17,25 @@
         padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
     }
 
+    .bronze {
+        background-color: #CD7F32;  /* Light brown color */
+    }
+
+    .silver {
+        background-color: #C0C0C0;  /* Light silver color */
+    }
+
+    .gold {
+        background-color: #FFD700;  /* Light gold color */
+    }
+
+    .challenger {
+        background-color: #FFA500;  /* Light orange color */
+    }
+
+    .grandmaster {
+        background-color: #FF4500;  /* Light red color */
+    }
 </style>
 
 <!-- Sidebar -->
@@ -44,14 +64,22 @@
             <th scope="col">Rank</th>
             <th scope="col">User</th>
             <th scope="col">Points</th>
+            <th scope="col">Tier</th>
           </tr>
         </thead>
         <tbody>
-          {% for profile in profiles %}
-            <tr>
-              <td>{{ forloop.counter0|add:profiles.start_index }}</td>
-              <td><a href="{% url 'pybo:profile_detail' profile.user.id %}">{{ profile.user.username }}</a></td>
-              <td>{{ profile.score }}</td>
+          {% for profile, rank, tier, icon in profile_list_with_tier %}
+            <tr class="{% if tier == 'bronze' %}bronze{% elif tier == 'silver' %}silver{% elif tier == 'gold' %}gold{% elif tier == 'challenger' %}challenger{% elif tier == 'grandmaster' %}grandmaster{% endif %}">
+                <td>{{ rank }}</td>
+                <td><a href="{% url 'pybo:profile_detail' profile.user.id %}">{{ profile.user.username }}</a></td>
+                <td>{{ profile.score }}</td>
+                <td>
+                    {% if icon %}
+                        <img src="{% static icon %}" alt="{{ tier }}" title="{{ tier }}" style="width:30px; height:30px;">
+                    {% else %}
+                        {{ tier }}
+                    {% endif %}
+                </td>
             </tr>
           {% endfor %}
         </tbody>
