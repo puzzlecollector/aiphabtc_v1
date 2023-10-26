@@ -18,6 +18,14 @@ from statsmodels.tsa.stattools import grangercausalitytests, coint
 from statsmodels.tsa.arima.model import ARIMA
 from pytz import timezone
 from prophet import Prophet
+import pickle
+from joblib import dump, load
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+from datetime import datetime, timezone
+import zoneinfo
+from zoneinfo import ZoneInfo  # Import ZoneInfo
+from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
 
 def granger_causality_test(data, max_lag):
@@ -149,6 +157,35 @@ def get_predictions_arima(btc_sequence, p=1, d=1, q=1, steps_ahead=6):
         print(f"Model fitting failed: {str(e)}")
         return np.zeros((steps_ahead,))
 
+def preprocess(df):
+    bitget = ccxt.bitget()
+    dates = df["timestamp"].values
+    timestamps = []
+    korean_timezone = zoneinfo.ZoneInfo("Asia/Seoul")
+    for i in range(len(dates)):
+        date_string = bitget.iso8601(int(dates[i]))
+        date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
+        korean_time = date_object.astimezone(korean_timezone)
+        formatted_korean_time = korean_time.strftime("%Y-%m-%d %H:%M:%S")
+        timestamps.append(formatted_korean_time)
+    df["datetime"] = timestamps
+    df = df.drop(columns={"timestamp"})
+    return df
+
+def get_predictions_autogluon(chart_df):
+    chart_df = preprocess(chart_df)
+    chart_df["item_id"] = "BTC"
+    chart_df = chart_df[["item_id", "datetime", "close"]]
+    chart_df.rename(columns={"datetime": "timestamp", "close": "target"}, inplace=True)
+    test_data = TimeSeriesDataFrame.from_data_frame(
+        chart_df,
+        id_column="item_id",
+        timestamp_column="timestamp"
+    )
+    best_predictor = TimeSeriesPredictor.load("pybo/views/autogluon_30m")
+    best_predictions = best_predictor.predict(test_data)
+    return best_predictions["mean"].values
+
 def time_series_views(request):
     bitget = ccxt.bitget()
     btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", "30m")
@@ -156,12 +193,22 @@ def time_series_views(request):
     btc_close = btc['close'].values
 
     labels = [
-        datetime.utcfromtimestamp(t / 1000).replace(tzinfo=timezone('UTC')).astimezone(timezone('Asia/Seoul')).strftime(
-            '%Y-%m-%d %H:%M:%S') for t in btc['timestamp']]
+        datetime.utcfromtimestamp(t / 1000)
+        .replace(tzinfo=timezone.utc)
+        .astimezone(ZoneInfo('Asia/Seoul'))  # Use ZoneInfo instead of timezone
+        .strftime('%Y-%m-%d %H:%M:%S')
+        for t in btc['timestamp']
+    ]
 
     # Get predictions
     prophet_forecast = get_predictions_fbprophet(btc_close, labels)
     arima_forecast = get_predictions_arima(btc_close)
+    mlp_forecast = get_predictions_autogluon(btc)
+
+    # Convert numpy float32 to Python float for JSON serialization
+    prophet_forecast = [float(f) for f in prophet_forecast]
+    arima_forecast = [float(f) for f in arima_forecast]
+    autogluon_forecast = [float(f) for f in mlp_forecast]
 
     # Append labels for forecast
     last_label = labels[-1]
@@ -176,9 +223,10 @@ def time_series_views(request):
     labels.extend(new_labels_str)
 
     context = {
-        "input_seq": list(btc_close[-30:]),
-        "prophet_forecast": list(prophet_forecast),
-        "arima_forecast": list(arima_forecast),
+        "input_seq": [float(f) for f in list(btc_close[-30:])],  # Convert numpy float32 to Python float
+        "prophet_forecast": prophet_forecast,
+        "arima_forecast": arima_forecast,
+        "autogluon_forecast": autogluon_forecast,
         "labels": labels[-36:],
     }
     return JsonResponse(context)

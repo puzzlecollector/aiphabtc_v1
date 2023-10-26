@@ -105,6 +105,7 @@
     <div style="text-align: left; margin-top: 50px">
         <p><b>FB Prophet</b>: FB Prophet은 Facebook에서 개발한 시계열 데이터 예측 모델로, 계절성과 휴일, 이벤트 등의 특이점을 고려하여 미래의 값을 예측할 수 있습니다. 사용이 매우 간편하며, 복잡한 파라미터 조정 없이도 좋은 예측 결과를 얻을 수 있습니다. 매출 예측, 주식 가격 예측, 날씨 예측 등 다양한 분야에서 활용이 가능합니다.</p>
         <p><b>ARIMA</b>: ARIMA 모델은 시계열 데이터의 트렌드와 계절성을 분석하여 미래 값을 예측하는 통계적 방법입니다. 이 모델은 과거의 데이터를 분석하여 데이터의 패턴을 찾아내고, 그 패턴을 바탕으로 미래의 값을 예측합니다. ARIMA 모델은 선형 모델로, 과거 데이터의 선형적 관계를 바탕으로 미래 값을 예측하며, 주식 가격, 매출 예측, 기상 예측 등 다양한 분야에서 활용됩니다.</p>
+        <p><b>AutoGluon</b>: AutoML 라이브러리인 AutoGluon은 내부적으로 다양한 최첨단 예측 알고리즘을 결합합니다. 이러한 알고리즘에는 StatsForecast 및 statsmodels 라이브러리의 ETS 및 ARIMA와 같은 확립된 통계적 방법, AutoGluon-Tabular을 기반으로 한 효율적인 트리 기반 예측기 LightGBM, 그리고 GluonTS의 DeepAR 및 Temporal Fusion Transformer와 같은 유연한 딥러닝 모델이 포함됩니다.</p>
     </div>
 
 
@@ -166,6 +167,18 @@
                         borderColor: 'rgba(0, 128, 0, 1)',
                         fill: false,
                         pointBackgroundColor: 'rgba(0, 128, 0, 1)', // this sets the color of the points
+                    },
+                    {
+                        label: 'AutoGluon',
+                        data: data.autogluon_forecast.map((point, i) => {
+                            return {
+                                x: data.labels[data.labels.length - data.autogluon_forecast.length + i],
+                                y: point
+                            };
+                        }),
+                        borderColor: 'rgba(0, 0, 255, 1)',
+                        fill: false,
+                        pointBackgroundColor: 'rgba(0, 0, 255, 1)', // this sets the color of the points
                     },
                 ],
             },
