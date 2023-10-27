@@ -170,21 +170,6 @@ def preprocess(df):
     df = df.drop(columns={"timestamp"})
     return df
 
-'''
-def get_predictions_autogluon(chart_df):
-    chart_df = preprocess(chart_df)
-    chart_df["item_id"] = "BTC"
-    chart_df = chart_df[["item_id", "datetime", "close"]]
-    chart_df.rename(columns={"datetime": "timestamp", "close": "target"}, inplace=True)
-    test_data = TimeSeriesDataFrame.from_data_frame(
-        chart_df,
-        id_column="item_id",
-        timestamp_column="timestamp"
-    )
-    best_predictor = TimeSeriesPredictor.load("pybo/views/autogluon_30m")
-    best_predictions = best_predictor.predict(test_data)
-    return best_predictions["mean"].values
-'''
 
 def time_series_views(request):
     bitget = ccxt.bitget()
@@ -227,3 +212,5 @@ def time_series_views(request):
         "labels": labels[-36:],
     }
     return JsonResponse(context)
+
+
