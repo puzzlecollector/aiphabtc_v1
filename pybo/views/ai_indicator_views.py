@@ -25,8 +25,6 @@ from sklearn.neural_network import MLPRegressor
 from datetime import datetime, timezone
 import zoneinfo
 from zoneinfo import ZoneInfo  # Import ZoneInfo
-from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-
 
 def granger_causality_test(data, max_lag):
     test = 'ssr_chi2test'
@@ -172,6 +170,7 @@ def preprocess(df):
     df = df.drop(columns={"timestamp"})
     return df
 
+'''
 def get_predictions_autogluon(chart_df):
     chart_df = preprocess(chart_df)
     chart_df["item_id"] = "BTC"
@@ -185,6 +184,7 @@ def get_predictions_autogluon(chart_df):
     best_predictor = TimeSeriesPredictor.load("pybo/views/autogluon_30m")
     best_predictions = best_predictor.predict(test_data)
     return best_predictions["mean"].values
+'''
 
 def time_series_views(request):
     bitget = ccxt.bitget()
@@ -203,12 +203,10 @@ def time_series_views(request):
     # Get predictions
     prophet_forecast = get_predictions_fbprophet(btc_close, labels)
     arima_forecast = get_predictions_arima(btc_close)
-    mlp_forecast = get_predictions_autogluon(btc)
 
     # Convert numpy float32 to Python float for JSON serialization
     prophet_forecast = [float(f) for f in prophet_forecast]
     arima_forecast = [float(f) for f in arima_forecast]
-    autogluon_forecast = [float(f) for f in mlp_forecast]
 
     # Append labels for forecast
     last_label = labels[-1]
@@ -226,7 +224,6 @@ def time_series_views(request):
         "input_seq": [float(f) for f in list(btc_close[-30:])],  # Convert numpy float32 to Python float
         "prophet_forecast": prophet_forecast,
         "arima_forecast": arima_forecast,
-        "autogluon_forecast": autogluon_forecast,
         "labels": labels[-36:],
     }
     return JsonResponse(context)
