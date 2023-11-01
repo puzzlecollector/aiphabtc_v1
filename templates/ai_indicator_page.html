@@ -107,6 +107,18 @@
         <p><b>ARIMA</b>: ARIMA 모델은 시계열 데이터의 트렌드와 계절성을 분석하여 미래 값을 예측하는 통계적 방법입니다. 이 모델은 과거의 데이터를 분석하여 데이터의 패턴을 찾아내고, 그 패턴을 바탕으로 미래의 값을 예측합니다. ARIMA 모델은 선형 모델로, 과거 데이터의 선형적 관계를 바탕으로 미래 값을 예측하며, 주식 가격, 매출 예측, 기상 예측 등 다양한 분야에서 활용됩니다.</p>
     </div>
 
+    <div style="text-align: left; margin-top: 50px">
+        <h2>딥러닝 언어모델 기반 문맥형 암호화폐 뉴스 유사도 지표</h2>
+        <div>
+            <form>  <!-- add form tag with method and action -->
+                {% csrf_token %}  <!-- include CSRF token -->
+                <textarea id="newsText" name="news_text" rows="8" cols="100" placeholder="뉴스 제목과 내용을 입력하세요."></textarea><br>
+                <button type="button" id="searchButton" class="btn btn-primary">검색</button>  <!-- change button type to submit -->
+            </form>
+            <div id="loading" style="display: none;">AI가 계산 중입니다...</div>
+            <div id="results"></div>
+        </div>
+    </div>
 
 </div>
 </div>
@@ -114,6 +126,7 @@
 {% endblock %}
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Added Chart.js library -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
     document.getElementById("fetchAICorrResponse").addEventListener("click", function() {
         document.getElementById("CorrLoading").style.display = "block";
@@ -197,8 +210,77 @@
         console.error("Error fetching forecast data:", error);
     });
 
-</script>
+    document.getElementById("searchButton").addEventListener("click", function() {
+        document.getElementById("loading").style.display = "block";
+        var newsText = document.getElementById("newsText").value;
 
+        // Get the CSRF token from the cookie
+        var csrfToken = getCookie('csrftoken');
+
+        fetch("/search_news/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken  // Include the CSRF token in the headers
+            },
+            body: JSON.stringify({ news_text: newsText }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';  // Clear previous results
+
+            data.results.forEach(function(result, index) {
+                var resultDiv = document.createElement('div');
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <h5> Rank ${index + 1} </h5>
+                    <p>${result.text}</p>
+                    <p><strong>문맥형 유사도:</strong> ${result.similarity}%</p>
+                    <p><strong>날짜:</strong> ${result.date}</p>
+                    <div class="chart" id="chart${index}"></div>
+                `;
+                resultsContainer.appendChild(resultDiv);
+
+                var chartDiv = document.getElementById(`chart${index}`);
+                Plotly.newPlot(chartDiv, [
+                    {
+                        type: 'scatter',
+                        mode: 'lines',
+                        x: result.chart_data.x,
+                        y: result.chart_data.y,
+                    },
+                ], {
+                    title: 'Bitcoin Price Chart',
+                    xaxis: { title: 'Time' },
+                    yaxis: { title: 'USDT' },
+                });
+            });
+
+            document.getElementById("loading").style.display = "none";
+        })
+        .catch(error => {
+            console.error("Error fetching news similarity results:", error);
+            document.getElementById("loading").style.display = "none";
+        });
+    });
+
+    // Function to get a cookie by name
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 <div class="footer">
     <div class="container text-center">
         <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>

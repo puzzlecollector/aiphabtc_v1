@@ -37,6 +37,8 @@ urlpatterns = [
          ai_indicator_views.fetch_ai_corr, name='fetch_ai_corr'),
     path('fetch_forecast/',
          ai_indicator_views.time_series_views, name='fetch_forecast'),
+    path('search_news/',
+         ai_indicator_views.search_news, name='search_news'),
 ]
 
 handler404 = 'common.views.page_not_found'
