@@ -150,24 +150,17 @@ def password_reset(request):
 @login_required(login_url='common:login')
 def attendance(request):
     user = request.user
-    current_time = localtime(now())
-
-    # Get the last attendance object for the user, if it exists
-    last_attendance = user.attendances.last()
-
-    # Initialize the attendance count for the new month
-    if last_attendance and last_attendance.timestamp.month != current_time.month:
-        attendances_last_month = 0  # Reset count for new month
-    else:
-        # Calculate the number of attendances this month
-        attendances_last_month = user.attendances.filter(timestamp__year=current_time.year,
-                                                         timestamp__month=current_time.month).count()
+    current_time = timezone.localtime(timezone.now())
+    # calculate the number of attendances in the current month
+    attendances_this_month = user.attendances.filter(
+        timestamp__year = current_time.year,
+        timestamp__month = current_time.month
+    ).count()
 
     attended_today = user.attendances.filter(timestamp__date=current_time.date()).exists()
 
-    if request.method == "POST" and not attended_today and attendances_last_month < 25:
+    if request.method == "POST" and not attended_today and attendances_this_month < 25:
         Attendance.objects.create(user=user, timestamp=current_time)
-        # Give the user 2 tokens (update your logic accordingly)
         user.profile.tokens += 2
         user.profile.save()
 
@@ -178,14 +171,14 @@ def attendance(request):
             reason="출석체크 보상"
         )
 
-        messages.success(request, '출석체크 완료! 2 토큰을 받았습니다.')
+        messages.success(request, "출석체크 완료! 2 토큰을 받았습니다.")
         return redirect('common:attendance')
 
     context = {
         'attended_today': attended_today,
-        'attendances_last_month': attendances_last_month,
+        'attendances_this_month': attendances_this_month,
         'tokens': user.profile.tokens,
-        'now': current_time,  # Pass local datetime to the template
+        'now': current_time,
     }
     return render(request, 'common/attendance.html', context)
 
