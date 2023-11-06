@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from common.forms import UserForm, IntroForm
-from common.models import Profile, Attendance
+from common.models import Profile, Attendance, PointTokenTransaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from common.forms import CustomPasswordChangeForm
 from django.utils import timezone
@@ -28,6 +28,7 @@ def base(request):
             return redirect("common:settings_base")
     else:
         form = IntroForm(initial={"intro":request.user.profile.intro})
+
     context = {'settings_type': 'base', 'form': form}
     return render(request, 'common/settings/base.html', context)
 
@@ -163,6 +164,14 @@ def attendance(request):
         # Give the user 2 tokens (update your logic accordingly)
         user.profile.tokens += 2
         user.profile.save()
+
+        PointTokenTransaction.objects.create(
+            user = user,
+            tokens = 2,
+            points = 0,
+            reason = "출석체크 보상"
+        )
+
         messages.success(request, '출석체크 완료! 2 토큰을 받았습니다.')
         return redirect('common:attendance')
 
@@ -174,3 +183,8 @@ def attendance(request):
     }
     return render(request, 'common/attendance.html', context)
 
+@login_required(login_url='common:login')
+def transaction_detail(request, transaction_id):
+    transaction = get_object_or_404(PointTokenTransaction, id=transaction_id, user=request.user)
+    transaction_list = PointTokenTransaction.objects.filter(user=request.user).order_by('-timestamp')
+    return render(request, 'common/transaction_detail.html', {'transaction':transaction, 'transaction_list':transaction_list})

@@ -61,3 +61,14 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
 
     profile.score = profile.calculate_score()
     profile.save()
+
+class PointTokenTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
+    points = models.IntegerField(default=0)
+    tokens = models.IntegerField(default=0)
+    reason = models.CharField(max_length=500)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ["-timestamp"]
+    def __str__(self):
+        return f"{self.user.username} - 포인트: {self.points}, 토큰: {self.tokens}, 내역: {self.reason}"

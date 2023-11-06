@@ -1,4 +1,5 @@
 {% load static %}
+{% load transaction_tags %}
 <!-- 네비게이션바 -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <a class="navbar-brand" href="{% url 'pybo:index' %}" style="color: #218838; font-weight: bold;">AIPHABTC</a>
@@ -23,6 +24,24 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:attendance' %}"><img src="{% static 'orange_checkmark.png' %}" alt="Attendance" style="width:20px; vertical-align: middle;">attendance</a>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" onclick="toggleDropdown(event)" aria-haspopup="true">
+                    <img src="{% static 'notification.png' %}" alt="Notifications" style="width:20px; vertical-align: middle;">activity
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    {% get_last_transactions as last_transactions %}
+                    {% for t in last_transactions %}
+                    <a class="dropdown-item" href="{% url 'common:transaction_detail' t.id %}">
+                        <strong>{{ t.timestamp|date:"SHORT_DATETIME_FORMAT" }}</strong>:
+                        {% if t.points %}{{ t.points }} points{% endif %}
+                        {% if t.tokens %}{{ t.tokens }} tokens{% endif %}
+                        - {{ t.reason }}
+                    </a>
+                    {% empty %}
+                    <a class="dropdown-item" href="#">최근 활동이 없습니다</a>
+                    {% endfor %}
+                </div>
+            </li>
             {% else %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:login' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">login</a>
@@ -34,3 +53,28 @@
         </ul>
     </div>
 </nav>
+
+<script>
+// This function toggles the dropdown.
+function toggleDropdown(event) {
+    // Prevent the default anchor behavior
+    event.preventDefault();
+    // Get the dropdown menu of the clicked dropdown link
+    var dropdownContent = event.currentTarget.nextElementSibling;
+    // Toggle the display property between 'block' and 'none'
+    dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+}
+
+// Optional: Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+    if (!event.target.matches('.dropdown-toggle')) {
+        var dropdowns = document.getElementsByClassName("dropdown-menu");
+        for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.style.display === 'block') {
+                openDropdown.style.display = 'none';
+            }
+        }
+    }
+}
+</script>

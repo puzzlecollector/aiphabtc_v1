@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect, resolve_url
 from django.utils import timezone
 from ..forms import CommentForm
 from ..models import Question, Answer, Comment
+from common.models import PointTokenTransaction
 
 @login_required(login_url='common:login')
 def comment_create_question(request, question_id):
@@ -16,6 +17,12 @@ def comment_create_question(request, question_id):
             comment.create_date = timezone.now()
             comment.question = question
             comment.save()
+            PointTokenTransaction.objects.create(
+                user=request.user,
+                points=1,
+                tokens=0,  # Assuming you only want to deal with points
+                reason="댓글 작성"
+            )
             return redirect('pybo:detail', question_id=question_id)
     else:
         form = CommentForm()
@@ -49,6 +56,12 @@ def comment_delete_question(request, comment_id):
         return redirect('pybo:detail', question_id=comment.question.id)
     else:
         comment.delete()
+        PointTokenTransaction.objects.create(
+            user=request.user,
+            points=-1,
+            tokens=0,  # Assuming you only want to deal with points
+            reason="댓글 삭제"
+        )
     return redirect('pybo:detail', question_id=comment.question.id)
 
 @login_required(login_url='common:login')
@@ -62,6 +75,12 @@ def comment_create_answer(request, answer_id):
             comment.create_date = timezone.now()
             comment.answer = answer
             comment.save()
+            PointTokenTransaction.objects.create(
+                user=request.user,
+                points=1,
+                tokens=0,  # Assuming you only want to deal with points
+                reason="댓글 작성"
+            )
             return redirect("pybo:detail", question_id=comment.answer.question.id)
     else:
         form = CommentForm()
@@ -95,4 +114,10 @@ def comment_delete_answer(request, comment_id):
         return redirect('pybo:detail', question_id=comment.answer.question.id)
     else:
         comment.delete()
+        PointTokenTransaction.objects.create(
+            user=request.user,
+            points=-1,
+            tokens=0,  # Assuming you only want to deal with points
+            reason="댓글 삭제"
+        )
     return redirect('pybo:detail', question_id=comment.answer.question.id)

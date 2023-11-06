@@ -28,4 +28,6 @@ urlpatterns = [
 
     # attendance page
     path('attendance/', views.attendance, name='attendance'),
+
+    path('transactions/<int:transaction_id>/', views.transaction_detail, name='transaction_detail')
 ]

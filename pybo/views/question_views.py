@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from ..forms import QuestionForm
 from ..models import Question, Board
+from common.models import PointTokenTransaction
 import time
 from datetime import timedelta
 
@@ -89,6 +90,22 @@ def question_create(request, board_name=None):
                     return redirect('pybo:question_create', board_name=board_name)
 
             question.save()
+            # Assign points based on the board
+            if board_name == "perceptive":
+                points_for_question = 5
+            elif board_name in ["free_board", "technical_blog", "trading_blog"]:
+                points_for_question = 3
+            else:
+                points_for_question = 0  # Default points for other boards if any
+            # Create a PointTokenTransaction after saving the question
+            eng_to_kor_name = {'perceptive':'관점공유 게시판', 'free_board':'자유게시판', 'technical_blog':'기술 블로그', 'trading_blog':'트레이딩 블로그'}
+            kor_board_name = eng_to_kor_name[board_name]
+            PointTokenTransaction.objects.create(
+                user=request.user,
+                points=points_for_question,
+                tokens=0,  # Assuming you only want to deal with points
+                reason=f"{kor_board_name}에 포스팅"
+            )
 
             if 'stored_form_data' in request.session:
                 del request.session['stored_form_data']
@@ -156,4 +173,20 @@ def question_delete(request, question_id):
         messages.error(request, "삭제권한이 없습니다!")
         return redirect('pybo:detail', question_id=question.id)
     question.delete()
+    if question.board.name == "perceptive":
+        points_for_question = -5
+    elif question.board.name in ["free_board", "technical_blog", "trading_blog"]:
+        points_for_question = -3
+    else:
+        points_for_question = 0  # Default points for other boards if any
+    # Create a PointTokenTransaction after saving the question
+    eng_to_kor_name = {'perceptive': '관점공유 게시판', 'free_board': '자유게시판', 'technical_blog': '기술 블로그',
+                       'trading_blog': '트레이딩 블로그'}
+    kor_board_name = eng_to_kor_name[question.board.name]
+    PointTokenTransaction.objects.create(
+        user=request.user,
+        points=points_for_question,
+        tokens=0,  # Assuming you only want to deal with points
+        reason=f"{kor_board_name}에 포스팅 삭제"
+    )
     return redirect('pybo:index')
