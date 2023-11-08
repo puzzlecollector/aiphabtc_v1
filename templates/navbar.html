@@ -42,6 +42,9 @@
                     {% endfor %}
                 </div>
             </li>
+            <li class="nav item">
+                <a class="nav-link" href="#"><img src="{% static 'friend.png' %}" alt="referral" style="width:20px; vertical-align: middle;">referral</a>
+            </li>
             {% else %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'common:login' %}"><img src="{% static 'logout.png' %}" alt="Logout" style="width:20px; vertical-align: middle;">login</a>
