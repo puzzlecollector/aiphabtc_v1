@@ -297,7 +297,6 @@ df30m = convert_json_chart_data_to_pd("pybo/views/BTC_USDT-30m-4.json")
 def inner_product_to_percentage(inner_product):
     return (inner_product + 1) / 2 * 100
 
-
 def search_news(request):
     if request.method == "POST":
         data = json.loads(request.body)

@@ -40,6 +40,7 @@ ALLOWED_HOSTS = ["3.39.160.218"]
 # Application definition
 
 INSTALLED_APPS = [
+    'background_task',
     'common.apps.CommonConfig',
     'pybo.apps.PyboConfig',
     'django.contrib.admin',

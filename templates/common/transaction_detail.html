@@ -10,12 +10,8 @@
           <h5 class="mb-1">{{ t.reason }}</h5>
           <small>Date: {{ t.timestamp }}</small>
         </div>
-        {% if t.points != 0 %}
-          <p class="mb-1">Points: {{ t.points }}</p>
-        {% endif %}
-        {% if t.tokens != 0 %}
-          <p class="mb-1">Tokens: {{ t.tokens }}</p>
-        {% endif %}
+        <p class="mb-1">Points: {{ t.points }}</p>
+        <p class="mb-1">Tokens: {{ t.tokens }}</p>
       </div>
     {% empty %}
       <div class="list-group-item">
