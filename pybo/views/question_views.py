@@ -198,7 +198,7 @@ def question_create(request, board_name=None):
                     request.session["stored_form_data"] = request.POST
                     return redirect('pybo:question_create', board_name=board_name)
                 question.save()
-            # question.save()
+            question.save()
             # Assign points based on the board
             if board_name == "perceptive":
                 points_for_question = 5
