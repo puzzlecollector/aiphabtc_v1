@@ -90,6 +90,23 @@
     #profile_base h3 {
         margin-bottom: 40px;  /* Adjust as per your requirement */
     }
+
+    .social_icon {
+        display: inline-block; /* Display icons inline */
+        margin: 0 10px; /* Add some space around each icon */
+        vertical-align: middle; /* Align icons vertically in the middle */
+    }
+
+    .social_icon img {
+        width: 24px; /* Size of the icons */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    /* Style for the container of the icons */
+    #social_links {
+        margin-top: 20px; /* Space above the icons */
+        text-align: center; /* Center align the icons */
+    }
 </style>
 <div class="col-md-10">
 
@@ -112,6 +129,29 @@
 
     <label for="score" class="profile_label">Points</label>
     <p id="score" class="profile_info mb-4">{{ user.profile.score }}</p>
+
+    <div id="social_links" style="text-align: left;">
+        {% if profile.instagram_url %}
+            <a href="{{ profile.instagram_url }}" target="_blank" class="social_icon">
+                <img src="{% static 'instagram.png' %}" alt="Instagram">
+            </a>
+        {% endif %}
+        {% if profile.twitter_url %}
+            <a href="{{ profile.twitter_url }}" target="_blank" class="social_icon">
+                <img src="{% static 'twitter.png' %}" alt="Twitter">
+            </a>
+        {% endif %}
+        {% if profile.youtube_url %}
+            <a href="{{ profile.youtube_url }}" target="_blank" class="social_icon">
+                <img src="{% static 'youtube.png' %}" alt="YouTube">
+            </a>
+        {% endif %}
+        {% if profile.personal_url %}
+            <a href="{{ profile.personal_url }}" target="_blank" class="social_icon">
+                <img src="{% static 'website.png' %}" alt="Website">
+            </a>
+        {% endif %}
+    </div>
 </div>
 
 </div>

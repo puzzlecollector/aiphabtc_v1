@@ -12,9 +12,19 @@ class UserForm(UserCreationForm):
         model = User
         fields = ("username", "email")
 
-# Adding new form for introduction
-class IntroForm(forms.Form):
-    intro = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': '여기에 한줄소개를 작성하세요'}))
+# Adding new form for introduction + social profile links
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['intro', 'instagram_url', 'twitter_url', 'youtube_url', 'personal_url']
+        widgets = {
+            'intro': forms.TextInput(attrs={'placeholder': '여기에 한줄소개를 작성하세요'}),
+            # Add placeholders or any other widget options as required
+            'instagram_url': forms.URLInput(attrs={'placeholder': 'Instagram URL'}),
+            'twitter_url': forms.URLInput(attrs={'placeholder': 'Twitter URL'}),
+            'youtube_url': forms.URLInput(attrs={'placeholder': 'YouTube URL'}),
+            'personal_url': forms.URLInput(attrs={'placeholder': 'Personal URL'}),
+        }
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(

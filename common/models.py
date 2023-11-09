@@ -20,7 +20,10 @@ class Profile(models.Model):
     tokens = models.PositiveIntegerField(default=0)
     referral_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
     referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
-
+    instagram_url = models.URLField(max_length=255, blank=True, null=True)
+    twitter_url = models.URLField(max_length=255, blank=True, null=True)
+    youtube_url = models.URLField(max_length=255, blank=True, null=True)
+    personal_url = models.URLField(max_length=255, blank=True, null=True)
     def generate_unique_referral_code(self):
         referral_code = secrets.token_urlsafe(8)[:8]
         while Profile.objects.filter(referral_code=referral_code).exists():

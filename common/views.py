@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from common.forms import UserForm, IntroForm
+from common.forms import UserForm, ProfileForm
 from common.models import Profile, Attendance, PointTokenTransaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,31 +15,29 @@ from django.utils import timezone
 from datetime import timedelta
 from django.utils.timezone import now, localtime
 
-
 @login_required(login_url='common:login')
 def base(request):
     # account settings base page
     if request.method == "POST":
-        form = IntroForm(request.POST)
+        # Instantiate the form with the posted data and files (if there are any)
+        form = ProfileForm(request.POST, instance=request.user.profile)
         if form.is_valid():
-            request.user.profile.intro = form.cleaned_data["intro"]
-            request.user.profile.save()
-            messages.success(request, '프로필이 정상적으로 업데이트 되었습니다!') # adding message
+            form.save()
+            messages.success(request, '프로필이 정상적으로 업데이트 되었습니다!')
             return redirect("common:settings_base")
     else:
-        form = IntroForm(initial={"intro":request.user.profile.intro})
-
+        # Instantiate the form with the current user's profile data
+        form = ProfileForm(instance=request.user.profile)
     context = {'settings_type': 'base', 'form': form}
     return render(request, 'common/settings/base.html', context)
 
 @login_required(login_url='common:login')
 def account_page(request):
     user = request.user
+    profile = user.profile
     context = {
         'user': user,
-        'email': user.email,
-        'username': user.username,
-        'intro': user.profile.intro,
+        'profile': profile,
     }
     return render(request, 'common/account_page.html', context)
 

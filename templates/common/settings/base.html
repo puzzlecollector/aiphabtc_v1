@@ -119,6 +119,18 @@
         {% csrf_token %}
         <label class="profile_label">한줄 소개</label>
         <input type="text" name="intro" class="profile_input mb-4" placeholder="여기에 한줄소개를 작성하세요" value="{{ user.profile.intro }}">
+
+        <label class="profile_label">Instagram</label>
+        <input type="url" name="instagram_url" class="profile_input mb-4" placeholder="Instagram URL" value="{{ user.profile.instagram_url }}">
+
+        <label class="profile_label">Twitter</label>
+        <input type="url" name="twitter_url" class="profile_input mb-4" placeholder="Twitter URL" value="{{ user.profile.twitter_url }}">
+
+        <label class="profile_label">YouTube</label>
+        <input type="url" name="youtube_url" class="profile_input mb-4" placeholder="YouTube URL" value="{{ user.profile.youtube_url }}">
+
+        <label class="profile_label">Personal Website</label>
+        <input type="url" name="personal_url" class="profile_input mb-4" placeholder="Personal URL" value="{{ user.profile.personal_url }}">
         <button type="submit">저장하기</button>
     </form>
 
