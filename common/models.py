@@ -1,8 +1,9 @@
-from django.db import models
+from django.db import models, IntegrityError, transaction
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from pybo.models import Question, Answer, Comment
+import secrets
 
 class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attendances")
@@ -17,6 +18,31 @@ class Profile(models.Model):
     image = models.ImageField(upload_to="profile_images/", null=True, blank=True)
     score = models.PositiveIntegerField(default=0)
     tokens = models.PositiveIntegerField(default=0)
+    referral_code = models.CharField(max_length=8, unique=True, null=True, blank=True)
+    referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals")
+
+    def generate_unique_referral_code(self):
+        referral_code = secrets.token_urlsafe(8)[:8]
+        while Profile.objects.filter(referral_code=referral_code).exists():
+            referral_code = secrets.token_urlsafe(8)[:8]
+        return referral_code
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = self.generate_unique_referral_code()
+            # Attempt to save with the new referral code in a transaction
+            while True:
+                try:
+                    with transaction.atomic():
+                        super(Profile, self).save(*args, **kwargs)
+                    break  # If save was successful, break out of the loop
+                except IntegrityError:
+                    # If an IntegrityError occurred, it could be due to a referral code collision.
+                    # Generate a new code and try again.
+                    self.referral_code = self.generate_unique_referral_code()
+        else:
+            # If the referral code is already set, just save the instance normally.
+            super(Profile, self).save(*args, **kwargs)
 
     def calculate_score(self):
         score = 0

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="col-12">
+    <div class="card shadow-sm mt-3 mb-5">
+      <div class="card-body">
+        <h2 class="card-title text-center">Referral Program</h2>
+        <hr>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="text-center my-4">
+          <p>친구들에게 당신의 고유 추천 코드를 공유하고 보상을 받으세요!</p>
+          <div class="referral-code-box bg-primary text-white py-2 px-4 rounded d-inline-block position-relative">
+            <strong id="referralCode">{{ referral_code }}</strong>
+            <button class="btn btn-light btn-sm copy-btn" onclick="copyToClipboard()" title="Copy to clipboard">
+              복사
+            </button>
+          </div>
+        </div>
+        {% if not has_referred %}
+          <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="referral_code" class="form-label">레퍼럴 코드를 입력하세요:</label>
+              <input type="text" id="referral_code" name="referral_code" class="form-control" placeholder="Referral Code">
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+          </form>
+        {% else %}
+          <div class="alert alert-info text-center">You have already used a referral code.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+<script>
+function copyToClipboard() {
+  var copyText = document.getElementById("referralCode").innerText;
+  var textArea = document.createElement("textarea");
+  textArea.value = copyText;
+  document.body.appendChild(textArea);
+  textArea.select();
+  document.execCommand("Copy");
+  textArea.remove();
+
+  // Optional: Show an alert or change the button text to show the copy was successful
+  alert("Copied to clipboard: " + copyText);
+}
+</script>
+{% endblock %}

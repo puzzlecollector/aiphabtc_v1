@@ -187,3 +187,50 @@ def transaction_detail(request, transaction_id):
     transaction = get_object_or_404(PointTokenTransaction, id=transaction_id, user=request.user)
     transaction_list = PointTokenTransaction.objects.filter(user=request.user).order_by('-timestamp')
     return render(request, 'common/transaction_detail.html', {'transaction':transaction, 'transaction_list':transaction_list})
+
+def referral_view(request):
+    if not request.user.is_authenticated:
+        return redirect('common:login')
+    user_profile = request.user.profile
+    if request.method == "POST":
+        referral_code = request.POST.get('referral_code').strip()
+        # check if the user has already used a referral code
+        if user_profile.referred_by is not None:
+            messages.error(request, '이미 추천 코드를 사용하셨습니다.')
+        # check if the referral code is the user's own code
+        elif referral_code == user_profile.referral_code:
+            messages.error(request, "본인의 레퍼럴 코드를 사용할 수 없어요!")
+        elif referral_code:
+            try:
+                referrer_profile = Profile.objects.get(referral_code=referral_code)
+                # additional check to prevent self referral
+                if referrer_profile.user == request.user:
+                    messages.error(request, '본인의 레퍼럴 코드를 사용할 수 없어요!')
+                    return redirect('referral')
+                user_profile.referred_by = referrer_profile
+                user_profile.tokens += 50
+                referrer_profile.tokens += 50
+                user_profile.save()
+                referrer_profile.save()
+                PointTokenTransaction.objects.create(
+                    user=request.user,
+                    points=0,
+                    tokens=50,
+                    reason='레퍼럴 코드 입력'
+                )
+                PointTokenTransaction.objects.create(
+                    user=referrer_profile.user,
+                    points=0,
+                    tokens=50,
+                    reason="레퍼럴 코드 입력"
+                )
+                messages.success(request, '추천 코드가 승인되었습니다. 귀하와 추천인 모두 토큰을 받게 되었습니다.')
+            except Profile.DoesNotExist:
+                messages.error(request, '유효하지 않은 레퍼릴 코드입니다!')
+    else:
+        referral_code = None
+    context = {
+        "referral_code": user_profile.referral_code,
+        "has_referred":  user_profile.referred_by is not None
+    }
+    return render(request, 'common/referral.html', context)
