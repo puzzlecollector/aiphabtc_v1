@@ -107,9 +107,88 @@
         margin-top: 20px; /* Space above the icons */
         text-align: center; /* Center align the icons */
     }
+
+    /* Additional styles for navigation and content sections */
+    .nav_button {
+        background-color: #4CAF50; /* Green background */
+        color: white; /* White text */
+        padding: 10px 15px; /* Padding */
+        margin: 5px; /* Margin */
+        border: none; /* No border */
+        border-radius: 5px; /* Rounded corners */
+        cursor: pointer; /* Pointer cursor on hover */
+    }
+
+    .nav_button:hover {
+        background-color: #45a049; /* Darker green on hover */
+    }
+
+    #navigation {
+        text-align: center; /* Center the navigation buttons */
+        margin-bottom: 20px; /* Space below the navigation bar */
+    }
+
+    .content_section {
+        display: none; /* Initially hide all sections */
+    }
+
+    #top_nav {
+        background-color: #333; /* Dark background for the nav bar */
+        overflow: hidden; /* Ensures the content fits in the navbar */
+        position: fixed; /* Fixed position */
+        top: 0; /* At the top of the page */
+        width: 100%; /* Full width */
+        z-index: 1000; /* Ensures nav bar stays on top */
+    }
+
+    .nav_link {
+        float: left; /* Align the buttons to the left */
+        color: white; /* White text */
+        text-align: center; /* Center text inside buttons */
+        padding: 14px 16px; /* Padding inside the buttons */
+        text-decoration: none; /* No underline on the text */
+        font-size: 17px; /* Font size */
+    }
+
+    .nav_link:hover {
+        background-color: #ddd; /* Light grey background on hover */
+        color: black; /* Black text on hover */
+    }
+
+    .nav_link.active {
+        background-color: #4CAF50; /* Green background for active link */
+        color: white; /* White text for active link */
+    }
+
+    /* Styles for the user profile navigation bar */
+    #user_profile_nav {
+        text-align: center; /* Center the navigation links */
+        margin-bottom: 20px; /* Space below the navigation bar */
+    }
+
+    .user_nav_link {
+        display: inline-block; /* Display links inline */
+        background-color: #4CAF50; /* Green background */
+        color: white; /* White text */
+        padding: 10px 20px; /* Padding */
+        margin: 10px 5px; /* Margin around the links */
+        border-radius: 5px; /* Rounded corners */
+        text-decoration: none; /* Remove underline from links */
+    }
+
+    .user_nav_link:hover {
+        background-color: #45a049; /* Darker green on hover */
+    }
 </style>
 
 <div class="col-md-10">
+    <div id="user_profile_nav">
+        <a href="#" class="user_nav_link" onclick="window.location.reload();">유저 프로필</a>
+        <a href="{% url 'common:user_questions' profile.user.id %}" class="user_nav_link">유저 포스트</a>
+        <a href="{% url 'common:user_answers' profile.user.id %}" class="user_nav_link">유저 답글</a>
+        <a href="{% url 'common:user_comments' profile.user.id %}" class="user_nav_link">유저 댓글</a>
+    </div>
+
     <div id="profile_base">
         <h3>{{ profile.user.username }}의 계정</h3>
 
@@ -148,7 +227,6 @@
                 </a>
             {% endif %}
         </div>
-
     </div>
 </div>
 {% endblock %}

@@ -24,6 +24,14 @@ class Profile(models.Model):
     twitter_url = models.URLField(max_length=255, blank=True, null=True)
     youtube_url = models.URLField(max_length=255, blank=True, null=True)
     personal_url = models.URLField(max_length=255, blank=True, null=True)
+
+    def get_user_questions(self):
+        return Question.objects.filter(author=self.user)
+    def get_user_answers(self):
+        return Answer.objects.filter(author=self.user)
+    def get_user_comments(self):
+        return Comment.objects.filter(author=self.user)
+
     def generate_unique_referral_code(self):
         referral_code = secrets.token_urlsafe(8)[:8]
         while Profile.objects.filter(referral_code=referral_code).exists():

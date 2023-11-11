@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head_extra %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+        #answers_section {
+            display: block;
+            border-radius: 8px; /* Rounded corners for the section */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for the section */
+            overflow: hidden; /* To respect border-radius */
+            background-color: #fff; /* White background */
+            margin-bottom: 20px; /* Space below the section */
+        }
+
+        #answers_section h3 {
+            background-color: #2D3E50; /* Dark blue */
+            color: white;
+            font-size: 18px;
+            padding: 12px 15px;
+            margin: 0; /* Remove default margin */
+            border-radius: 8px 8px 0 0; /* Rounded corners for the header */
+        }
+
+        #answers_section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem; /* Spacing from the title */
+        }
+
+        #answers_section th, #answers_section td {
+            border: 1px solid #dee2e6; /* Light grey border */
+            padding: 0.75rem; /* Padding inside cells */
+            text-align: center; /* Center align text */
+        }
+
+        #answers_section th {
+            background-color: #f8f9fa; /* Light grey background */
+            color: #495057; /* Dark grey text color */
+        }
+
+        /* Zebra-striping for rows */
+        #answers_section tr:nth-child(odd) {
+            background-color: #f2f2f2; /* Light color for odd rows */
+        }
+
+        #answers_section tr:nth-child(even) {
+            background-color: #e9ecef; /* Slightly different light color for even rows */
+        }
+
+        /* Hover effect for rows */
+        #answers_section tr:hover {
+            background-color: #dae0e5; /* Light blue for hover */
+        }
+
+        /* Link styles for answers */
+        #answers_section .answer-link {
+            color: #007bff; /* Bootstrap default blue for links */
+            text-decoration: none;
+            display: block; /* Makes the whole cell clickable */
+        }
+
+        #answers_section .answer-link:hover {
+            text-decoration: underline;
+            color: #0056b3; /* Darker blue for hover */
+        }
+
+        #pagination .step-links {
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        #pagination .step-links a {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+        }
+
+        #pagination .step-links a:hover {
+            background-color: #45a049;
+        }
+
+        #pagination .step-links .current {
+            padding: 5px 10px;
+            margin: 0 5px;
+        }
+
+        #questions_section .questions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem; /* Spacing from the title */
+        }
+
+        #questions_section .questions-table th,
+        #questions_section .questions-table td {
+            border: 1px solid #dee2e6; /* Light grey border */
+            padding: 0.75rem; /* Padding inside cells */
+            text-align: center; /* Center align text */
+        }
+
+        #questions_section .questions-table th {
+            background-color: #f8f9fa; /* Light grey background */
+            color: #495057; /* Dark grey text color */
+        }
+
+        /* Zebra-striping for rows */
+        #questions_section .questions-table tr:nth-child(odd) {
+            background-color: #f2f2f2; /* Light color for odd rows */
+        }
+
+        #questions_section .questions-table tr:nth-child(even) {
+            background-color: #e9ecef; /* Slightly different light color for even rows */
+        }
+
+        /* Hover effect for rows */
+        #questions_section .questions-table tr:hover {
+            background-color: #dae0e5; /* Light blue for hover */
+        }
+
+        /* Link styles */
+        #questions_section .questions-table .question-link {
+            color: #007bff; /* Bootstrap default blue for links */
+            text-decoration: none;
+        }
+
+        #questions_section .questions-table .question-link:hover {
+            text-decoration: underline;
+        }
+
+        .nav_link {
+            float: left; /* Align the buttons to the left */
+            color: white; /* White text */
+            text-align: center; /* Center text inside buttons */
+            padding: 14px 16px; /* Padding inside the buttons */
+            text-decoration: none; /* No underline on the text */
+            font-size: 17px; /* Font size */
+        }
+
+        .nav_link:hover {
+            background-color: #ddd; /* Light grey background on hover */
+            color: black; /* Black text on hover */
+        }
+
+        .nav_link.active {
+            background-color: #4CAF50; /* Green background for active link */
+            color: white; /* White text for active link */
+        }
+
+        /* Styles for the user profile navigation bar */
+        #user_profile_nav {
+            text-align: center; /* Center the navigation links */
+            margin-bottom: 20px; /* Space below the navigation bar */
+        }
+
+        .user_nav_link {
+            display: inline-block; /* Display links inline */
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            padding: 10px 20px; /* Padding */
+            margin: 10px 5px; /* Margin around the links */
+            border-radius: 5px; /* Rounded corners */
+            text-decoration: none; /* Remove underline from links */
+        }
+
+        .user_nav_link:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+</style>
+
+<div class="col-md-10">
+    <div id="user_profile_nav">
+        <a href="{% url 'pybo:profile_detail' profile.user.id %}" class="user_nav_link">유저 프로필</a>
+        <a href="{% url 'common:user_questions' profile.user.id %}" class="user_nav_link">유저 포스트</a>
+        <a href="{% url 'common:user_answers' profile.user.id %}" class="user_nav_link">유저 답글</a>
+        <a href="{% url 'common:user_comments' profile.user.id %}" class="user_nav_link">유저 댓글</a>
+    </div>
+    <div id="profile_base">
+        <!-- Answers Section -->
+        <div id="answers_section" class="content_section" style="display:block;">
+            <h3>Replies</h3>
+            <table class="answers-table">
+                <tr>
+                    <th>Content</th>
+                    <th>Date</th>
+                    <th>Question</th>
+                </tr>
+                {% for answer in answers %}
+                <tr>
+                    <td>{{ answer.content|truncatewords:10 }}</td>
+                    <td>{{ answer.create_date | date:"Y-m-d H:i" }}</td>
+                    <td><a href="{% url 'pybo:detail' answer.question.id %}" class="question-link">{{ answer.question.subject }}</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No answers available.</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <!-- Pagination controls here -->
+            <ul class="pagination justify-content-center">
+                {% if answers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ answers.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                {% for num in answers.paginator.page_range %}
+                    {% if num >= answers.number|add:'-3' and num <= answers.number|add:'3' %}
+                        {% if num == answers.number %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if answers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ answers.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -31,5 +31,11 @@ urlpatterns = [
 
     path('transactions/<int:transaction_id>/', views.transaction_detail, name='transaction_detail'),
 
-    path('referral/', views.referral_view, name='referral')
+    path('referral/', views.referral_view, name='referral'),
+
+    path('user/<int:user_id>/questions/', views.user_questions, name='user_questions'),
+
+    path('user/<int:user_id>/answers/', views.user_answers, name='user_answers'),
+
+    path('user/<int:user_id>/comments/', views.user_comments, name='user_comments'),
 ]

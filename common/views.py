@@ -12,8 +12,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from common.forms import CustomPasswordChangeForm
 from django.utils import timezone
+from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils.timezone import now, localtime
+from pybo.models import Question, Answer, Comment
+from django.core.paginator import Paginator
 
 @login_required(login_url='common:login')
 def base(request):
@@ -35,11 +38,51 @@ def base(request):
 def account_page(request):
     user = request.user
     profile = user.profile
+
+    user_questions = Question.objects.filter(author=user)
+    user_answers = Answer.objects.filter(author=user)
+    user_comments = Comment.objects.filter(author=user)
+
     context = {
         'user': user,
         'profile': profile,
+        'questions': user_questions,
+        'answers': user_answers,
+        'comments': user_comments
     }
     return render(request, 'common/account_page.html', context)
+
+@login_required(login_url='common:login')
+def user_questions(request, user_id):
+    # Fetch the user based on the passed user_id
+    user = get_object_or_404(User, pk=user_id)
+    questions_list = Question.objects.filter(author=user).order_by('-create_date')
+    # Set up pagination
+    paginator = Paginator(questions_list, 10)  # 10 questions per page
+    page_number = request.GET.get('page')
+    questions = paginator.get_page(page_number)
+    profile = user.profile
+    return render(request, 'common/user_questions.html', {'questions': questions, 'profile':profile})
+
+@login_required(login_url='common:login')
+def user_answers(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    answers_lists = Answer.objects.filter(author=user).order_by('-create_date')
+    paginator = Paginator(answers_lists, 10) # 10 answers per page
+    page_number = request.GET.get('page')
+    answers = paginator.get_page(page_number)
+    profile = user.profile
+    return render(request, 'common/user_answers.html', {'answers': answers, 'profile': profile})
+
+@login_required(login_url='common:login')
+def user_comments(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    comments_list = Comment.objects.filter(author=user).order_by('-create_date')
+    paginator = Paginator(comments_list, 10) # 10 comments per page
+    page_number = request.GET.get('page')
+    comments = paginator.get_page(page_number)
+    profile = user.profile
+    return render(request, 'common/user_comments.html', {'comments': comments, 'profile': profile})
 
 
 @login_required(login_url='common:login')
