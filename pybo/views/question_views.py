@@ -59,7 +59,6 @@ def verify_prediction_task(user_id, question_id, duration, crypto, direction, pr
     actual_price_change = ((Decimal(current_price) - Decimal(question.initial_price)) / Decimal(question.initial_price)) * 100
     correct_prediction = (actual_price_change > 0 and direction == "bullish") or \
                          (actual_price_change < 0 and direction == "bearish")
-
     if correct_prediction:
         base_point = points_map[duration]
         accuracy = abs(Decimal(actual_price_change) - Decimal(price_change))
@@ -81,6 +80,8 @@ def verify_prediction_task(user_id, question_id, duration, crypto, direction, pr
             reason = "예측 정확도에 따른 토큰 지급"
         )
         logging.info(f"축하합니다! 예측이 정확했고 {awarded_points} 토큰을 얻었습니다.")
+        question.prediction_correct = True # set prediction as correct, but we are not using this for accuracy calculation now
+        question.save()
     else:
         # no tokens awarded to user
         PointTokenTransaction.objects.create(
@@ -90,6 +91,8 @@ def verify_prediction_task(user_id, question_id, duration, crypto, direction, pr
             reason="예측 정확도에 따른 토큰 지급"
         )
         logging.info("예측이 틀렸네요. 다음에 또 도전해 보세요!")
+        question.prediction_correct = False  # set prediction as correct
+        question.save()
 
 @login_required(login_url="common:login")
 def question_create(request, board_name=None):

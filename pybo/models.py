@@ -16,6 +16,8 @@ class Question(models.Model):
     modify_date = models.DateTimeField(null=True, blank=True)
     voter = models.ManyToManyField(User, related_name='voter_question') # add voter
     initial_price = models.DecimalField(max_digits=20, decimal_places=8, null=True, blank=True)
+    prediction_correct = models.BooleanField(default=False)
+
     def __str__(self):
         return self.subject
     def save(self, *args, **kwargs):

@@ -227,7 +227,10 @@ def attendance(request):
 def transaction_detail(request, transaction_id):
     transaction = get_object_or_404(PointTokenTransaction, id=transaction_id, user=request.user)
     transaction_list = PointTokenTransaction.objects.filter(user=request.user).order_by('-timestamp')
-    return render(request, 'common/transaction_detail.html', {'transaction':transaction, 'transaction_list':transaction_list})
+    paginator = Paginator(transaction_list, 10) # 10 transactions per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'common/transaction_detail.html', {'transaction':transaction, 'transaction_list':page_obj})
 
 def referral_view(request):
     if not request.user.is_authenticated:

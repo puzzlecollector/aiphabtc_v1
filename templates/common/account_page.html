@@ -211,6 +211,11 @@
     <label for="score" class="profile_label">Points</label>
     <p id="score" class="profile_info mb-4">{{ user.profile.score }}</p>
 
+    <label for="prediction_accuracy" class="profile_label">예측 정확도</label>
+    <p id="prediction_accuracy" class="profile_info mb-4">
+        {{ user.profile.perceptive_prediction_accuracy|floatformat:2 }}%
+    </p>
+
     <div id="social_links" style="text-align: left;">
         {% if profile.instagram_url %}
             <a href="{{ profile.instagram_url }}" target="_blank" class="social_icon">

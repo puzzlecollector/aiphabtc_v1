@@ -19,5 +19,41 @@
       </div>
     {% endfor %}
   </div>
+  <!-- Pagination -->
+  <div class="pagination-wrapper">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if transaction_list.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ transaction_list.previous_page_number }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">&laquo;</span>
+          </li>
+        {% endif %}
+        {% for i in transaction_list.paginator.page_range %}
+          {% if transaction_list.number == i %}
+            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if transaction_list.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ transaction_list.next_page_number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">&raquo;</span>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
 </div>
 {% endblock %}

@@ -42,7 +42,6 @@ import plotly.io as pio
 from plotly.graph_objs import Scatter
 import plotly.express as px
 
-
 def granger_causality_test(data, max_lag):
     test = 'ssr_chi2test'
     result = grangercausalitytests(data, max_lag, verbose=True)
@@ -175,7 +174,6 @@ def get_predictions_arima(btc_sequence, p=1, d=1, q=1, steps_ahead=6):
     except Exception as e:
         print(f"Model fitting failed: {str(e)}")
         return np.zeros((steps_ahead,))
-
 
 def preprocess(df):
     bitget = ccxt.bitget()

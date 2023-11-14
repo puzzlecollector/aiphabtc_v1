@@ -24,6 +24,7 @@ class Profile(models.Model):
     twitter_url = models.URLField(max_length=255, blank=True, null=True)
     youtube_url = models.URLField(max_length=255, blank=True, null=True)
     personal_url = models.URLField(max_length=255, blank=True, null=True)
+    prediction_accuracy = models.FloatField(default=0.0)
 
     def get_user_questions(self):
         return Question.objects.filter(author=self.user)
@@ -31,6 +32,28 @@ class Profile(models.Model):
         return Answer.objects.filter(author=self.user)
     def get_user_comments(self):
         return Comment.objects.filter(author=self.user)
+
+    def total_perceptive_predictions(self):
+        # return self.user.author_question.filter(board__name='perceptive').count()
+        total_transactions = self.user.transactions.filter(
+            reason="예측 정확도에 따른 토큰 지급"
+        ).count()
+        return total_transactions
+
+    def correct_perceptive_predictions(self):
+        # Count all transactions with the specific reason indicating a correct prediction
+        correct_transactions = self.user.transactions.filter(
+            reason="예측 정확도에 따른 토큰 지급",
+            tokens__gt=0  # Assuming tokens are awarded only for correct predictions
+        ).count()
+        return correct_transactions
+
+    def perceptive_prediction_accuracy(self):
+        total = self.total_perceptive_predictions()
+        correct = self.correct_perceptive_predictions()
+        print(total, correct)
+        # Calculate accuracy as a percentage
+        return (correct / total * 100) if total > 0 else 0
 
     def generate_unique_referral_code(self):
         referral_code = secrets.token_urlsafe(8)[:8]
