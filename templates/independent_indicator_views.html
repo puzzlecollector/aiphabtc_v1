@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load pybo_filter %}
+{% block content %}
+
+<style>
+    .sidebar-item {
+        border-bottom: 2px solid #000;  /* Only the bottom border */
+        margin-bottom: 12px;            /* Space between items */
+        border-radius: 5px;             /* Optional: rounds the corners */
+    }
+
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
+    }
+
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
+    }
+
+</style>
+
+<div class="col-md-10">
+<div class="container my-3">
+    <div style="text-align; center; margin-top: 50px">
+        <h3>coming soon!</h3>
+    </div>
+</div>
+</div>
+<form id="searchForm" method="get" action="{% url 'index' %}">
+    <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+    <input type="hidden" id="so" name="so" value="{{ so }}">
+</form>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+</script>
+
+<div class="footer">
+    <div class="container text-center">
+        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>
+    </div>
+</div>
+{% endblock %}
