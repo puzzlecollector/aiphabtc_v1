@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load pybo_filter %}
 {% block content %}
+{% load static %}
+
 
 <style>
     .sidebar-item {
@@ -23,28 +25,437 @@
         padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
     }
 
+    .row.align-items-center {
+        display: flex;
+        align-items: center;
+    }
+    /* Additional styles for the toggle buttons */
+    .toggle-buttons {
+        padding-left: 10px; /* Spacing from the content */
+        display: flex;
+        flex-direction: column; /* Aligns the buttons vertically */
+        justify-content: center; /* Centers the buttons vertically if they have less height than Content 3 */
+    }
+    .tooltip-question-mark {
+        cursor: help; /* Change the cursor to indicate help/info */
+        display: inline-block; /* Make sure the span behaves correctly inline */
+    }
+
+    .tooltip-inner {
+        /* Adjust max-width to control the width of the tooltip */
+        max-width: 300px; /* Example width */
+        /* Set a min-height if you want a taller tooltip by default */
+        min-height: 100px; /* Example height */
+        text-align: left;
+        white-space: pre-wrap; /* Ensures that the text wraps */
+    }
+
+    /* You may also want to adjust the positioning of the tooltip arrow */
+    .bs-tooltip-top .arrow::before, .bs-tooltip-auto[x-placement^="top"] .arrow::before {
+        margin-left: -3px;
+    }
+
+    /* Styles for the table */
+    .table {
+        width: auto; /* Adjust the width as needed */
+        margin: 0 auto; /* Center the table */
+        border-collapse: collapse; /* Remove gaps between cells */
+    }
+
+    .table th, .table td {
+        border: 1px solid #ddd; /* Add a subtle border */
+        padding: 8px; /* Reduce padding for a more compact look */
+        text-align: center; /* Center align the text */
+    }
+
+    .table thead {
+        background-color: #f8f9fa; /* Light background for the header */
+        color: #333; /* Darker text for contrast */
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #f2f2f2; /* Zebra striping for rows */
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+        .table {
+            width: 100%; /* Full width on smaller screens */
+        }
+    }
+
+    .correlation-toggle-buttons button {
+        margin: 3px;
+        padding: 5px 10px; /* Reduced padding */
+        font-size: 0.8rem; /* Smaller font size */
+        cursor: pointer;
+        border: 1px solid #ccc; /* Thinner border */
+        background-color: #f8f8f8; /* Light background for better visibility */
+        border-radius: 4px; /* Slight rounding of corners */
+    }
+
+    .ratio-bar-container {
+        display: flex;
+        width: 100%;
+        background-color: #ddd; /* Light grey background */
+        height: 30px; /* Adjust as needed */
+        border-radius: 5px; /* Optional: for rounded corners */
+        overflow: hidden; /* Ensure the content does not spill outside the container */
+    }
+
+    .ratio-bar {
+        display: flex;
+        align-items: center; /* Center the text vertically */
+        justify-content: center; /* Center the text horizontally */
+        color: white; /* Text color */
+        font-weight: bold; /* Bold text */
+        height: 100%; /* Full height of the container */
+    }
+
+    .btn-ratio-toggle {
+        padding: 5px 15px;
+        margin: 0 5px;
+        border: none;
+        background-color: #f1f1f1;
+        color: #333;
+        border-radius: 4px;
+        cursor: pointer;
+        outline: none;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn-ratio-toggle:hover {
+        background-color: #e7e7e7;
+    }
+
+    .btn-ratio-toggle.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .gpt-toggle-buttons button {
+        margin: 3px;
+        padding: 5px 10px; /* Reduced padding */
+        font-size: 0.8rem; /* Smaller font size */
+        cursor: pointer;
+        border: 1px solid #ccc; /* Thinner border */
+        background-color: #f8f8f8; /* Light background for better visibility */
+        border-radius: 4px; /* Slight rounding of corners */
+    }
+
+    .news-table {
+        display: table;
+        width: 100%;
+        margin: 20px 0;
+        border-collapse: collapse;
+    }
+
+    .news-row {
+        display: table-row;
+        background-color: #f9f9f9;
+        transition: background-color 0.3s;
+    }
+
+    .news-row:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .news-row:hover {
+        background-color: #eaeaea;
+    }
+
+    .news-cell {
+        display: table-cell;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        position: relative;  /* for tooltip positioning */
+    }
+
+    .title-cell {
+        font-weight: bold;
+        color: #333;
+        cursor: help; /* indicates that a tooltip is available */
+    }
+
+    .datetime-cell {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    /* Tooltip styling */
+    .title-cell:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 0;
+        bottom: 100%;  /* Position above the title */
+        margin-bottom: 10px; /* Lift the tooltip up */
+        background-color: #333;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        z-index: 10;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
+        white-space: normal;
+        text-align: left;
+        overflow-y: auto;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .title-cell:hover::after {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .sentiment-scores {
+        margin: 20px 0;
+    }
+
+    .sentiment-score {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 10px;
+    }
+
+    .sentiment-bar {
+        height: 20px;
+        background-color: #4caf50;
+        transition: width 0.3s ease;
+    }
+
+    .sentiment-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+    }
 </style>
 
-<div class="col-md-10">
+<!-- Main Container -->
 <div class="container my-3">
-    <div style="text-align; center; margin-top: 50px">
-        <h3>coming soon!</h3>
+    <h3>AIPHABTC 비트코인 분석 대시보드</h3>
+    <!-- Toggle Buttons for Platform and Language -->
+    <div class="row">
+        <div class="col-12 text-right">
+        <!-- Platform Toggle Buttons with a margin-bottom for spacing -->
+            <div class="btn-group mb-3 d-inline-block" role="group" aria-label="Platform Toggle">
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'upbit.png' %}" alt="Upbit Icon" style="height: 20px; margin-right: 5px;">
+                    Upbit
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'bitget_v2.png' %}" alt="Bitget Icon" style="height: 20px; margin-right: 5px;">
+                    Bitget
+                </button>
+            </div>
+        </div>
+        <div class="col-12 text-right">
+            <!-- Language Toggle Buttons -->
+            <div class="btn-group d-inline-block" role="group" aria-label="Language Toggle">
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'korean.png' %}" alt="Korean Flag" style="height: 20px; margin-right: 5px;">
+                    한글
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'english.png' %}" alt="English Flag" style="height: 20px; margin-right: 5px;">
+                    English
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row for three columns -->
+    <div class="row">
+        <!-- First Column -->
+        <div class="col-md-4">
+            <!-- Content for the first column -->
+            <div class="sidebar-item">비트코인 트레이딩 봇 지표</div>
+                <div style="text-align; center; margin-top: 10px">
+                    <p>알파비트 인공지능 팀이 지속적으로 연구 및 개발하고 있는 비트코인 선물 투자봇들입니다</p>
+                    <p>
+                        <strong>AIPHABOT 예측 결과</strong>
+                        <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="1시간 봇: long은 예측 유효 시점동안 0.5% 이상 시가 기준 가격이 오를 확률 short은 0.5% 이상 가격이 내릴 확률 hold는 0.5%미만으로 가격이 변동할 확률입니다. 4시간 봇: long은 예측 유효 시점동안 0.75% 이상 시가 기준 가격이 오를 확률 short은 0.75% 이상 가격이 내릴 확률 hold는 0.75% 미만으로 가격이 변동할 확률입니다. 1d 봇: long은 예측 유효 시점동안 3% 이상 시가 기준 가격이 오를 확률 short은 3% 이상 가격이 내릴 확률 hold는 3% 미만으로 가격이 변동할 확률입니다. 현재는 가벼운 단일 XGBoost 모델로 구성되어 있으나 업데이트를 거치면서 더 강력한 AIPHABOT을 출시할 예정입니다. 각 모델은 1시간, 4시간, 1일마다 업데이트 됩니다.">[?]</span>
+                        <div class="btn-group" role="group" aria-label="Timeframe Toggles">
+                            <button type="button" id="btn1h_aiphabot" class="btn btn-outline-secondary btn-sm">1h</button>
+                            <button type="button" id="btn4h_aiphabot" class="btn btn-outline-secondary btn-sm">4h</button>
+                            <button type="button" id="btn1d_aiphabot" class="btn btn-outline-secondary btn-sm">1d</button>
+                        </div>
+                        <div class="probabilities" id="predictions4h" style="display: none;">
+                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj4h }} - {{ aipha_date_obj_end4h }}</p>
+                            <div class="probabilities">
+                                <div class="probability">
+                                    <strong>Long 확률:</strong> {{ aiphabot_long_prob_4h|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Short 확률:</strong> {{ aiphabot_short_prob_4h|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Hold 확률:</strong> {{ aiphabot_hold_prob_4h|floatformat:2 }}%
+                                </div>
+                                <canvas id="myChart4h" width="250" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="probabilities" id="predictions1h">
+                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj1h }} - {{ aipha_date_obj_end1h }}</p>
+                            <div class="probabilities">
+                                <div class="probability">
+                                    <strong>Long 확률:</strong> {{ aiphabot_long_prob_1h|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Short 확률:</strong> {{ aiphabot_short_prob_1h|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Hold 확률:</strong> {{ aiphabot_hold_prob_1h|floatformat:2 }}%
+                                </div>
+                                <canvas id="myChart1h" width="250" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="probabilities" id="predictions1d" style="display: none;">
+                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj1d }} - {{ aipha_date_obj_end1d }}</p>
+                            <div class="probabilities">
+                                <div class="probability">
+                                    <strong>Long 확률:</strong> {{ aiphabot_long_prob_1d|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Short 확률:</strong> {{ aiphabot_short_prob_1d|floatformat:2 }}%
+                                </div>
+                                <div class="probability">
+                                    <strong>Hold 확률:</strong> {{ aiphabot_hold_prob_1d|floatformat:2 }}%
+                                </div>
+                                <canvas id="myChart1d" width="250" height="250"></canvas>
+                            </div>
+                        </div>
+                        <a href="https://ieeexplore.ieee.org/document/10014986">[참고 논문]</a>
+                    </p>
+
+                    <br>
+                    <br>
+                    <p>
+                        <strong>15분 단타봇 예측 결과</strong>
+                        <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="다음 15분동안 비트코인 가격이 오를지 내릴지 예측해서 확률을 보여주는 봇 지표입니다. AIPHABOT이나 CBITS와 다르게 n시간봉동안 x%가 오르는 확률을 예측하는것이 아닌, 종가 기준으로 가격이 오를지 내릴지를 예측합니다.">[?]</span>
+                        <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj15m }} - {{ aipha_date_obj_end15m }}</p>
+                        <div class="probabilities">
+                            <div class="probability">
+                                <strong>Long 확률:</strong> {{ aipha_long_prob_15m|floatformat:2 }}%
+                            </div>
+                            <div class="probability">
+                                <strong>Short 확률:</strong> {{ aipha_short_prob_15m|floatformat:2 }}%
+                            </div>
+                            <canvas id="myChart15m" width="250" height="250"></canvas>
+                        </div>
+                        <br>
+                        <br>
+                    </p>
+                    <br>
+                </div>
+        </div>
+
+        <!-- Second Column -->
+        <div class="col-md-4">
+
+        </div>
+
+        <!-- Third Column -->
+        <div class="col-md-4">
+
+        </div>
     </div>
 </div>
-</div>
+
+
 <form id="searchForm" method="get" action="{% url 'index' %}">
     <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
     <input type="hidden" id="page" name="page" value="{{ page }}">
     <input type="hidden" id="so" name="so" value="{{ so }}">
 </form>
+
 {% endblock %}
+
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Added Chart.js library -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript">
+    // Initialize tooltips
+    $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    // Function to initialize pie charts
+    function initPieChart(chartId, data, backgroundColor, borderColor) {
+        var ctx = document.getElementById(chartId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Long', 'Short', 'Hold'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: true
+            }
+        });
+    }
+    // Toggle between different bot predictions
+    function toggleBotPrediction(timeframe) {
+        // Hide all predictions
+        document.getElementById('predictions1h').style.display = 'none';
+        document.getElementById('predictions4h').style.display = 'none';
+        document.getElementById('predictions1d').style.display = 'none';
+
+        // Show the selected prediction
+        document.getElementById('predictions' + timeframe).style.display = 'block';
+    }
+
+    // Event listeners for the timeframe buttons
+    document.getElementById('btn1h_aiphabot').addEventListener('click', function() { toggleBotPrediction('1h'); });
+    document.getElementById('btn4h_aiphabot').addEventListener('click', function() { toggleBotPrediction('4h'); });
+    document.getElementById('btn1d_aiphabot').addEventListener('click', function() { toggleBotPrediction('1d'); });
+
+    // Initialize all pie charts with respective data
+    var myChart15 = initPieChart('myChart15m', [{{ aipha_long_prob_15m }}, {{ aipha_short_prob_15m }}],
+        ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+        ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)']
+    );
+    var myChart1h = initPieChart('myChart1h', [{{ aiphabot_long_prob_1h }}, {{ aiphabot_short_prob_1h }}, {{ aiphabot_hold_prob_1h }}],
+        ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+        ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)']
+    );
+    var myChart4h = initPieChart('myChart4h', [{{ aiphabot_long_prob_4h }}, {{ aiphabot_short_prob_4h }}, {{ aiphabot_hold_prob_4h }}],
+        ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+        ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)']
+    );
+    var myChart1d = initPieChart('myChart1d', [{{ aiphabot_long_prob_1d }}, {{ aiphabot_short_prob_1d }}, {{ aiphabot_hold_prob_1d }}],
+        ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+        ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)']
+    );
+
+    // Default to 1-hour bot prediction on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleBotPrediction('1h');
+    });
 </script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
 
 <div class="footer">
     <div class="container text-center">
-        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a></p>
+        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com</a> | 본 지표와 봇들은 투자 권유용이 아닙니다. 투자는 항상 본인이 신중하게 결정해서 하시길 바랍니다.</p>
     </div>
 </div>
 {% endblock %}
