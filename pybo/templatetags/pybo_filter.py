@@ -15,6 +15,12 @@ def mark(value):
     extensions = ["nl2br", "fenced_code"]
     return mark_safe(markdown.markdown(value, extensions=extensions))
 
+@register.filter(name='get_item')
+def get_item(list, index):
+    try:
+        return list[index]
+    except IndexError:
+        return None
 
 
 

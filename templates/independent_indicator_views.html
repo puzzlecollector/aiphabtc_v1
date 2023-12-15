@@ -288,10 +288,10 @@
                             <button type="button" id="btn1d_aiphabot" class="btn btn-outline-secondary btn-sm">1d</button>
                         </div>
                         <div class="probabilities" id="predictions4h" style="display: none;">
-                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj4h }} - {{ aipha_date_obj_end4h }}</p>
-                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price4h }}</p>
-                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit4h|floatformat:2 }}</p>
-                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit4h|floatformat:2 }}</p>
+                            <p>예측 유효 시점 (KST): {{ aiphabot_date_obj4h }} - {{ aipha_date_obj_end4h }}</p>
+                            <p>진입 가격 (USDT): {{ aipha_enter_price4h }}</p>
+                            <p>Long Take Profit (USDT): {{ aipha_long_take_profit4h|floatformat:2 }}</p>
+                            <p>Short Take Profit (USDT): {{ aipha_short_take_profit4h|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_4h|floatformat:2 }}%
@@ -307,10 +307,10 @@
                         </div>
 
                         <div class="probabilities" id="predictions1h">
-                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj1h }} - {{ aipha_date_obj_end1h }}</p>
-                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price1h }}</p>
-                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit1h|floatformat:2 }}</p>
-                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit1h|floatformat:2 }}</p>
+                            <p>예측 유효 시점 (KST): {{ aiphabot_date_obj1h }} - {{ aipha_date_obj_end1h }}</p>
+                            <p>진입 가격 (USDT): {{ aipha_enter_price1h }}</p>
+                            <p>Long Take Profit (USDT): {{ aipha_long_take_profit1h|floatformat:2 }}</p>
+                            <p>Short Take Profit (USDT): {{ aipha_short_take_profit1h|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_1h|floatformat:2 }}%
@@ -326,10 +326,10 @@
                         </div>
 
                         <div class="probabilities" id="predictions1d" style="display: none;">
-                            <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj1d }} - {{ aipha_date_obj_end1d }}</p>
-                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price1d|floatformat:2 }}</p>
-                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit1d|floatformat:2 }}</p>
-                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit1d|floatformat:2 }}</p>
+                            <p>예측 유효 시점 (KST): {{ aipha_date_obj1d }} - {{ aipha_date_obj_end1d }}</p>
+                            <p>진입 가격 (USDT): {{ aipha_enter_price1d|floatformat:2 }}</p>
+                            <p>Long Take Profit (USDT): {{ aipha_long_take_profit1d|floatformat:2 }}</p>
+                            <p>Short Take Profit (USDT): {{ aipha_short_take_profit1d|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_1d|floatformat:2 }}%
@@ -349,8 +349,8 @@
                     <p>
                         <strong>15분 단타봇 예측 결과</strong>
                         <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="다음 15분동안 비트코인 가격이 오를지 내릴지 예측해서 확률을 보여주는 봇 지표입니다. AIPHABOT이나 CBITS와 다르게 n시간봉동안 x%가 오르는 확률을 예측하는것이 아닌, 종가 기준으로 가격이 오를지 내릴지를 예측합니다.">[?]</span>
-                        <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj15m }} - {{ aipha_date_obj_end15m }}</p>
-                        <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price15m|floatformat:2 }}</p>
+                        <p>예측 유효 시점 (KST): {{ aipha_date_obj15m }} - {{ aipha_date_obj_end15m }}</p>
+                        <p>진입 가격 (USDT): {{ aipha_enter_price15m|floatformat:2 }}</p>
                         <div class="probabilities">
                             <div class="probability">
                                 <strong>Long 확률:</strong> {{ aipha_long_prob_15m|floatformat:2 }}%
@@ -406,6 +406,36 @@
                         <button class="btn-ratio-toggle btn-ratio-toggle-1d">1d</button>
                 </div>
                 <canvas id="btcChart" width="500" height="500"></canvas>
+            </p>
+            <br>
+            <p>
+                <a href="https://www.coinness.com" target="_blank" style="text-decoration: none; color: inherit;">
+                    <img src="{% static 'coinness.png' %}" alt="Coinness Icon" style="vertical-align: middle; margin-right: 5px; height: 30px;">
+                </a>
+                <strong>코인니스 최신 속보</strong>
+                <div class="news-table">
+                    {% for item in scraped_data %}
+                        <div class="news-row">
+                            <div class="news-cell title-cell" data-tooltip="{{ item.contents }}">
+                                <span class="news-title">{{ item.titles }}</span>
+                            </div>
+                            <div class="news-cell datetime-cell">
+                                <span class="news-datetime">{{ item.datetimes|date:"Y-m-d H:i" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <p> 딥러닝 언어모델 비트코인 감성 점수 </p>
+                <small>최근 속보들이 비트코인 가격에 얼만큼 호재, 악재, 중립성을 띄고 있는지 CryptoBERT 언어모델이 분석한 결과입니다.</small>
+                <div class="sentiment-scores">
+                    {% for score in avg_sentiment_scores %}
+                        <div class="sentiment-score">
+                            <span class="sentiment-label">{{ sentiment_labels|get_item:forloop.counter0 }}:</span>
+                            <div class="sentiment-bar" style="width: {{ score }}%;"></div>
+                            <span class="sentiment-text" style="color: black;">{{ score|floatformat:2 }}%</span>
+                        </div>
+                    {% endfor %}
+                </div>
             </p>
         </div>
 
