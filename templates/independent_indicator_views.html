@@ -276,7 +276,7 @@
         <!-- First Column -->
         <div class="col-md-4">
             <!-- Content for the first column -->
-            <div class="sidebar-item">비트코인 트레이딩 봇 지표</div>
+            <div class="sidebar-item">트레이딩 봇 지표</div>
                 <div style="text-align; center; margin-top: 10px">
                     <p>알파비트 인공지능 팀이 지속적으로 연구 및 개발하고 있는 비트코인 선물 투자봇들입니다</p>
                     <p>
@@ -289,6 +289,9 @@
                         </div>
                         <div class="probabilities" id="predictions4h" style="display: none;">
                             <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj4h }} - {{ aipha_date_obj_end4h }}</p>
+                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price4h }}</p>
+                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit4h|floatformat:2 }}</p>
+                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit4h|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_4h|floatformat:2 }}%
@@ -305,6 +308,9 @@
 
                         <div class="probabilities" id="predictions1h">
                             <p><strong>예측 유효 시점 (KST)</strong>: {{ aiphabot_date_obj1h }} - {{ aipha_date_obj_end1h }}</p>
+                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price1h }}</p>
+                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit1h|floatformat:2 }}</p>
+                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit1h|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_1h|floatformat:2 }}%
@@ -321,6 +327,9 @@
 
                         <div class="probabilities" id="predictions1d" style="display: none;">
                             <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj1d }} - {{ aipha_date_obj_end1d }}</p>
+                            <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price1d|floatformat:2 }}</p>
+                            <p><strong>Long Take Profit (USDT)</strong>: {{ aipha_long_take_profit1d|floatformat:2 }}</p>
+                            <p><strong>Short Take Profit (USDT)</strong>: {{ aipha_short_take_profit1d|floatformat:2 }}</p>
                             <div class="probabilities">
                                 <div class="probability">
                                     <strong>Long 확률:</strong> {{ aiphabot_long_prob_1d|floatformat:2 }}%
@@ -343,6 +352,7 @@
                         <strong>15분 단타봇 예측 결과</strong>
                         <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="다음 15분동안 비트코인 가격이 오를지 내릴지 예측해서 확률을 보여주는 봇 지표입니다. AIPHABOT이나 CBITS와 다르게 n시간봉동안 x%가 오르는 확률을 예측하는것이 아닌, 종가 기준으로 가격이 오를지 내릴지를 예측합니다.">[?]</span>
                         <p><strong>예측 유효 시점 (KST)</strong>: {{ aipha_date_obj15m }} - {{ aipha_date_obj_end15m }}</p>
+                        <p><strong>진입 가격 (USDT)</strong>: {{ aipha_enter_price15m|floatformat:2 }}</p>
                         <div class="probabilities">
                             <div class="probability">
                                 <strong>Long 확률:</strong> {{ aipha_long_prob_15m|floatformat:2 }}%
@@ -361,12 +371,12 @@
 
         <!-- Second Column -->
         <div class="col-md-4">
-
+            <div class="sidebar-item">시계열 예측 지표</div>
         </div>
 
         <!-- Third Column -->
         <div class="col-md-4">
-
+            <div class="sidebar-item">LLM 해석 지표</div>
         </div>
     </div>
 </div>
@@ -410,6 +420,26 @@
             }
         });
     }
+
+    function initPieChartBinary(chartId, data, backgroundColor, borderColor) {
+        var ctx = document.getElementById(chartId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Long', 'Short'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: true
+            }
+        });
+    }
     // Toggle between different bot predictions
     function toggleBotPrediction(timeframe) {
         // Hide all predictions
@@ -427,7 +457,7 @@
     document.getElementById('btn1d_aiphabot').addEventListener('click', function() { toggleBotPrediction('1d'); });
 
     // Initialize all pie charts with respective data
-    var myChart15 = initPieChart('myChart15m', [{{ aipha_long_prob_15m }}, {{ aipha_short_prob_15m }}],
+    var myChart15 = initPieChartBinary('myChart15m', [{{ aipha_long_prob_15m }}, {{ aipha_short_prob_15m }}],
         ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
         ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)']
     );

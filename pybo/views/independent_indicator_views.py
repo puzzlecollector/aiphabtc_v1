@@ -96,6 +96,10 @@ def basic_aiphabot_1hr():
                 val_ret.append(ret)
             chart_df["{}_change_{}".format(col, l)] = val_ret
 
+    enter_price = chart_df["open"].values[-1]
+    long_take_profit_price = enter_price * (1 + 0.50/100)
+    short_take_profit_price = enter_price * (1 - 0.50/100)
+
     chart_df.drop(columns={"timestamp", "open", "high", "low", "close", "volume", "vwap", "hwma", "datetime"}, inplace=True)
     chart_df.dropna(inplace=True)
 
@@ -112,7 +116,8 @@ def basic_aiphabot_1hr():
     model.load_model("pybo/views/aiphabot_1hr")
     x = chart_df.iloc[-2, :].values.reshape((-1, chart_df.shape[1]))  # get previous timestep information
     pred = model.predict_proba(x)
-    return date_obj, date_obj_end, pred[0]
+    pred = pred[0]
+    return date_obj, date_obj_end, pred, enter_price, long_take_profit_price, short_take_profit_price
 
 def basic_aiphabot_4hrs():
     bitget = ccxt.bitget()
@@ -154,6 +159,10 @@ def basic_aiphabot_4hrs():
                 val_ret.append(ret)
             chart_df["{}_change_{}".format(col, l)] = val_ret
 
+    enter_price = chart_df["open"].values[-1]
+    long_take_profit_price = enter_price * (1 + 0.75 / 100)
+    short_take_profit_price = enter_price * (1 - 0.75 / 100)
+
     chart_df.drop(columns={"timestamp", "open", "high", "low", "close", "volume", "vwap", "hwma", "datetime"}, inplace=True)
     chart_df.dropna(inplace=True)
     date_obj = chart_df.index[-1]
@@ -169,7 +178,8 @@ def basic_aiphabot_4hrs():
     model.load_model("pybo/views/xgb_optuna_optimized_4hrs")
     x = chart_df.iloc[-2, :].values.reshape((-1, chart_df.shape[1]))  # get previous timestep information
     pred = model.predict_proba(x)
-    return date_obj, date_obj_end, pred[0]
+    pred = pred[0]
+    return date_obj, date_obj_end, pred, enter_price, long_take_profit_price, short_take_profit_price
 
 def basic_aiphabot_1d():
     bitget = ccxt.bitget()
@@ -211,6 +221,10 @@ def basic_aiphabot_1d():
                 val_ret.append(ret)
             chart_df["{}_change_{}".format(col, l)] = val_ret
 
+    enter_price = chart_df["open"].values[-1]
+    long_take_profit_price = enter_price * (1 + 3 / 100)
+    short_take_profit_price = enter_price * (1 - 3 / 100)
+
     chart_df.drop(columns={"timestamp", "open", "high", "low", "close", "volume", "vwap", "hwma", "datetime"}, inplace=True)
     chart_df.dropna(inplace=True)
     date_obj = chart_df.index[-1]
@@ -226,7 +240,8 @@ def basic_aiphabot_1d():
     model.load_model("pybo/views/aiphabot_1d")
     x = chart_df.iloc[-2, :].values.reshape((-1, chart_df.shape[1]))  # get previous timestep information
     pred = model.predict_proba(x)
-    return date_obj, date_obj_end, pred[0]
+    pred = pred[0]
+    return date_obj, date_obj_end, pred, enter_price, long_take_profit_price, short_take_profit_price
 
 def aiphabot_15mins():
     bitget = ccxt.bitget()
@@ -270,6 +285,8 @@ def aiphabot_15mins():
                 val_ret.append(ret)
             chart_df["{}_change_{}".format(col, l)] = val_ret
 
+    enter_price = chart_df["open"].values[-1]
+
     chart_df.drop(columns={"timestamp", "open", "high", "low", "close", "volume", "vwap", "hwma", "datetime"}, inplace=True)
     chart_df.dropna(inplace=True)
 
@@ -286,43 +303,48 @@ def aiphabot_15mins():
     model.load_model("pybo/views/15min_xgb_v1")
     x = chart_df.iloc[-2, :].values.reshape((-1, chart_df.shape[1]))  # get previous timestep information
     pred = model.predict_proba(x)
-    return date_obj, date_obj_end, pred[0]
-
+    pred = pred[0]
+    return date_obj, date_obj_end, pred, enter_price
 
 def independent_indicator_view(request):
-    aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m = aiphabot_15mins()
-    aipha_date_obj1h, aipha_date_obj_end1h, aipha_predictions1 = basic_aiphabot_1hr()
-    aipha_date_obj4h, aipha_date_obj_end4h, aipha_predictions4 = basic_aiphabot_4hrs()
-    aipha_date_obj1d, aipha_date_obj_end1d, aipha_predictions1d = basic_aiphabot_1d()
-
-    print(aipha_date_obj15m, aipha_date_obj_end15m)
-    print(aipha_date_obj1h, aipha_date_obj_end1h)
-    print(aipha_date_obj4h, aipha_date_obj_end4h)
-    print(aipha_date_obj1d, aipha_date_obj_end1d)
+    aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
+    aipha_date_obj1h, aipha_date_obj_end1h, aipha_predictions1h, aipha_enter_price1h, aipha_long_take_profit1h, aipha_short_take_profit1h = basic_aiphabot_1hr()
+    aipha_date_obj4h, aipha_date_obj_end4h, aipha_predictions4h, aipha_enter_price4h, aipha_long_take_profit4h, aipha_short_take_profit4h = basic_aiphabot_4hrs()
+    aipha_date_obj1d, aipha_date_obj_end1d, aipha_predictions1d, aipha_enter_price1d, aipha_long_take_profit1d, aipha_short_take_profit1d = basic_aiphabot_1d()
 
     context = {
         "aipha_long_prob_15m": aipha_predictions15m[0] * 100,
         "aipha_short_prob_15m": aipha_predictions15m[1] * 100,
         "aipha_date_obj15m": aipha_date_obj15m,
         "aipha_date_obj_end15m": aipha_date_obj_end15m,
+        "aipha_enter_price15m": aipha_enter_price15m,
 
-        "aiphabot_long_prob_1h": aipha_predictions1[0] * 100,
-        "aiphabot_short_prob_1h": aipha_predictions1[1] * 100,
-        "aiphabot_hold_prob_1h": aipha_predictions1[2] * 100,
+        "aiphabot_long_prob_1h": aipha_predictions1h[0] * 100,
+        "aiphabot_short_prob_1h": aipha_predictions1h[1] * 100,
+        "aiphabot_hold_prob_1h": aipha_predictions1h[2] * 100,
         "aiphabot_date_obj1h": aipha_date_obj1h,
         "aipha_date_obj_end1h": aipha_date_obj_end1h,
+        "aipha_enter_price1h": aipha_enter_price1h,
+        "aipha_long_take_profit1h": aipha_long_take_profit1h,
+        "aipha_short_take_profit1h": aipha_short_take_profit1h,
 
-        "aiphabot_long_prob_4h": aipha_predictions4[0] * 100,
-        "aiphabot_short_prob_4h": aipha_predictions4[1] * 100,
-        "aiphabot_hold_prob_4h": aipha_predictions4[2] * 100,
+        "aiphabot_long_prob_4h": aipha_predictions4h[0] * 100,
+        "aiphabot_short_prob_4h": aipha_predictions4h[1] * 100,
+        "aiphabot_hold_prob_4h": aipha_predictions4h[2] * 100,
         "aiphabot_date_obj4h": aipha_date_obj4h,
         "aipha_date_obj_end4h": aipha_date_obj_end4h,
+        "aipha_enter_price4h": aipha_enter_price4h,
+        "aipha_long_take_profit4h": aipha_long_take_profit4h,
+        "aipha_short_take_profit4h": aipha_short_take_profit4h,
 
         "aiphabot_long_prob_1d": aipha_predictions1d[0] * 100,
         "aiphabot_short_prob_1d": aipha_predictions1d[1] * 100,
         "aiphabot_hold_prob_1d": aipha_predictions1d[2] * 100,
         "aipha_date_obj1d": aipha_date_obj1d,
         "aipha_date_obj_end1d": aipha_date_obj_end1d,
+        "aipha_enter_price1d": aipha_enter_price1d,
+        "aipha_long_take_profit1d": aipha_long_take_profit1d,
+        "aipha_short_take_profit1d": aipha_short_take_profit1d,
     }
 
     return render(request, 'independent_indicator_views.html', context)
