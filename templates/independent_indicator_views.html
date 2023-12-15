@@ -482,6 +482,72 @@
                     </table>
             </p>
             <br>
+            <p>
+                <strong>상관관계 정보</strong>
+                <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="상관계수들은 -1에서 1 사이의 값을 가지며, 1에 가까울수록 두 자산 간의 양의 상관관계가 강함을, -1에 가까울수록 음의 상관관계가 강함을 의미합니다. 0은 상관관계가 없음을 나타냅니다. 상관지수들은 가장 최근 한달간의 일봉 데이터를 이용해서 계산되었습니다.">[?]</span>
+                <div class="correlation-toggle-buttons">
+                    <button onclick="showCorrelation('pearson')">Pearson</button>
+                    <button onclick="showCorrelation('spearman')">Spearman</button>
+                    <button onclick="showCorrelation('kendall')">Kendall's Tau</button>
+                </div>
+                <div id="pearson" class="correlation-table">
+                <table class="table">
+                    <h6>Pearson Correlation</h6>
+                    <tr>
+                    <th></th>
+                    {% for asset in pearson_corr.keys %}
+                        <th>{{ asset }}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for index, row in pearson_corr.items %}
+                        <tr>
+                            <td>{{ index }}</td>
+                            {% for col, value in row.items %}
+                                <td>{{ value |floatformat:2 }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table></div>
+
+                <div id="spearman" class="correlation-table" style="display:none;">
+                <table class="table">
+                    <h6>Spearman Correlation</h6>
+                    <tr>
+                    <th></th>
+                    {% for asset in spearman_corr.keys %}
+                        <th>{{ asset }}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for index, row in spearman_corr.items %}
+                        <tr>
+                            <td>{{ index }}</td>
+                            {% for col, value in row.items %}
+                                <td>{{ value |floatformat:2 }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table></div>
+
+                <div id="kendall" class="correlation-table" style="display:none;">
+                <table class="table">
+                    <h6>Kendall's Tau</h6>
+                    <tr>
+                    <th></th>
+                    {% for asset in kendall_corr.keys %}
+                        <th>{{ asset }}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for index, row in kendall_corr.items %}
+                        <tr>
+                            <td>{{ index }}</td>
+                            {% for col, value in row.items %}
+                                <td>{{ value |floatformat:2 }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table></div>
+            </p>
+            <br>
         </div>
     </div>
 </div>
@@ -504,6 +570,16 @@
     $(document).ready(function() {
         $('[data-toggle="tooltip"]').tooltip();
     });
+
+    // For showing correlation
+    function showCorrelation(type) {
+        // Hide all tables
+        document.querySelectorAll('.correlation-table').forEach(table => {
+            table.style.display = 'none';
+        });
+        // Show the selected table
+        document.getElementById(type).style.display = 'block';
+    }
 
     // Function to initialize pie charts
     function initPieChart(chartId, data, backgroundColor, borderColor) {

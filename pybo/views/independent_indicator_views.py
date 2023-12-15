@@ -419,6 +419,32 @@ def time_series_analysis(request, timeframe='1h'):
     }
     return JsonResponse(context)
 
+def get_correlations():
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+    # Fetch data for S&P 500, Bitcoin, Gold, and Ethereum
+    sp500 = yf.download('^GSPC', start=start_date, end=end_date)['Close']
+    bitcoin = yf.download('BTC-USD', start=start_date, end=end_date)['Close']
+    gold = yf.download('GC=F', start=start_date, end=end_date)['Close']
+    ethereum = yf.download('ETH-USD', start=start_date, end=end_date)['Close']
+    # Align the lengths of the data
+    min_length = min(len(sp500), len(bitcoin), len(gold), len(ethereum))
+    sp500_aligned = sp500.iloc[:min_length]
+    bitcoin_aligned = bitcoin.iloc[:min_length]
+    gold_aligned = gold.iloc[:min_length]
+    ethereum_aligned = ethereum.iloc[:min_length]
+    # Create a DataFrame with aligned data
+    data_aligned = pd.DataFrame(
+        {'SP500': sp500_aligned, 'Bitcoin': bitcoin_aligned, 'Gold': gold_aligned, 'Ethereum': ethereum_aligned})
+    # Calculate Pearson, Spearman, and Kendall Tau correlations
+    pearson_corr = data_aligned.corr(method='pearson')
+    spearman_corr = data_aligned.corr(method='spearman')
+    kendall_corr = data_aligned.corr(method='kendall')
+    pearson_corr_dict = pearson_corr.to_dict(orient='index')
+    spearman_corr_dict = spearman_corr.to_dict(orient='index')
+    kendall_corr_dict = kendall_corr.to_dict(orient='index')
+    return pearson_corr_dict, spearman_corr_dict, kendall_corr_dict
+
 
 def independent_indicator_view(request):
     aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
@@ -435,6 +461,8 @@ def independent_indicator_view(request):
     data_global = response_global.json()
 
     kimchi_data = get_kimchi_data()
+
+    pearson_corr, spearman_corr, kendall_corr = get_correlations()
 
     context = {
         # first column
@@ -476,7 +504,10 @@ def independent_indicator_view(request):
 
         # third column
         "data_global": data_global,
-        "kimchi_data": kimchi_data
+        "kimchi_data": kimchi_data,
+        'pearson_corr': pearson_corr,
+        'spearman_corr': spearman_corr,
+        'kendall_corr': kendall_corr,
     }
 
     return render(request, 'independent_indicator_views.html', context)
