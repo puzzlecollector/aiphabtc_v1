@@ -345,8 +345,6 @@
                         </div>
                         <a href="https://ieeexplore.ieee.org/document/10014986">[참고 논문]</a>
                     </p>
-
-                    <br>
                     <br>
                     <p>
                         <strong>15분 단타봇 예측 결과</strong>
@@ -372,11 +370,108 @@
         <!-- Second Column -->
         <div class="col-md-4">
             <div class="sidebar-item">시계열 예측 지표</div>
+            <p>
+                <strong>크립토 공포 탐욕 지수</strong>
+                <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="크립토 공포와 탐욕 지수는 투자자들의 시장에 대한 감정을 나타내는 지표 중 하나로 사용됩니다. 이 지수는 0에서 100 사이의 값을 가지며, 0에 가까울수록 투자자들이 두려움을 느끼고 있음을, 100에 가까울수록 탐욕적임을 나타냅니다. 이 지수는 주로 시장의 극단적인 감정 상태를 포착해 반대 방향으로의 변화를 예측하는데 사용됩니다. 지수가 탐욕으로 옮겨가면 비트코인 가격이 오를 가능성이 있지만, 이는 또한 가격이 과열되어 조정을 받을 수 있는 시점에 접어들 수 있음을 의미합니다.">[?]</span>
+                <p>비트코인 및 기타 대형 암호화폐를 위한 과거 7일동안의 공포 탐욕 지수입니다 </p>
+                <p></p><a href="https://alternative.me/crypto/fear-and-greed-index/">[참고]</a></p>
+                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Latest Crypto Fear & Greed Index" width="250" height="250" style="display: block; margin-left: auto; margin-right: auto;" />
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Value</th>
+                            <th>Value Classification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in data_fng %}
+                        <tr>
+                            <td>{{ row.timestamp }}</td>
+                            <td>{{ row.value }}</td>
+                            <td>{{ row.value_classification }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </p>
+            <br>
+
         </div>
 
         <!-- Third Column -->
         <div class="col-md-4">
             <div class="sidebar-item">LLM 해석 지표</div>
+            <p>
+                <strong>글로벌 크립토 시장 정보</strong>
+                <p>암호화폐 시장의 전반적인 정보입니다</p>
+                <p></p><a href="https://www.coinlore.com/ko/cryptocurrency-data-api">[참고]</a></p>
+                <table class="table">
+                    {% for row in data_global %}
+                        <tr>
+                            <th>코인 수</th>
+                            <td>{{ row.coins_count }}</td>
+                        </tr>
+                        <tr>
+                            <th>활성 시장</th>
+                            <td>{{ row.active_markets }}</td>
+                        </tr>
+                        <tr>
+                            <th>시가 총액 ($)</th>
+                            <td>{{ row.total_mcap |floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>총 거래량 ($)</th>
+                            <td>{{ row.total_volume |floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>BTC 도미넌스 (%)</th>
+                            <td>{{ row.btc_d |floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>ETH 도미넌스 (%)</th>
+                            <td>{{ row.eth_d |floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>시가 총액 변화 (%)</th>
+                            <td>{{ row.mcap_change |floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <th>거래량 변화 (%)</th>
+                            <td>{{ row.volume_change |floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </p>
+            <br>
+            <p>
+                <strong>김치 프리미엄 정보</strong>
+                <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="김치 프리미엄이란 용어는 한국의 암호화폐 가격이 해외 거래소의 가격보다 높을 때 사용됩니다. 김프가 높다는 것은 해외 거래소에서 상장된 코인의 가격이 한국 내에서 거래되는 가격보다 상대적으로 저렴하다는 의미입니다.">[?]</span>
+                <p>비트겟과 업비트에서 가져온 BTC 가격 정보로 계산된 수치입니다 (비트겟/업비트 프리미엄)</p>
+                <table class="table">
+                            <tr>
+                                <th>현재 시간</th>
+                                <td>{{ kimchi_data.current_time }}</td>
+                            </tr>
+                            <tr>
+                                <th>USD/KRW</th>
+                                <td>{{ kimchi_data.now_usd_krw |floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>BTC 가격 (KRW)</th>
+                                <td>{{ kimchi_data.now_upbit_price |floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>BTC 가격 (USDT)</th>
+                                <td>{{ kimchi_data.now_bitget_price |floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>BTC 김프 (%)</th>
+                                <td>{{ kimchi_data.kp |floatformat:2 }}</td>
+                            </tr>
+                    </table>
+            </p>
+            <br>
         </div>
     </div>
 </div>

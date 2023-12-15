@@ -306,13 +306,62 @@ def aiphabot_15mins():
     pred = pred[0]
     return date_obj, date_obj_end, pred, enter_price
 
+def get_kimchi_data():
+    bitget = ccxt.bitget()
+    data = {}
+    data["current_time"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    USDKRW = yf.Ticker("USDKRW=X")
+    history = USDKRW.history(period="1d")
+    data["now_usd_krw"] = history["Close"].iloc[0]
+    data["now_upbit_price"] = pyupbit.get_current_price("KRW-BTC")
+    data["now_bitget_price"] = bitget.fetch_ticker("BTC/USDT")["close"]
+    data["kp"] = round((data["now_upbit_price"] * 100 / (data["now_bitget_price"] * data["now_usd_krw"])) - 100, 3)
+    return data
+
+def get_correlations():
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+    # Fetch data for S&P 500, Bitcoin, Gold, and Ethereum
+    sp500 = yf.download('^GSPC', start=start_date, end=end_date)['Close']
+    bitcoin = yf.download('BTC-USD', start=start_date, end=end_date)['Close']
+    gold = yf.download('GC=F', start=start_date, end=end_date)['Close']
+    ethereum = yf.download('ETH-USD', start=start_date, end=end_date)['Close']
+    # Align the lengths of the data
+    min_length = min(len(sp500), len(bitcoin), len(gold), len(ethereum))
+    sp500_aligned = sp500.iloc[:min_length]
+    bitcoin_aligned = bitcoin.iloc[:min_length]
+    gold_aligned = gold.iloc[:min_length]
+    ethereum_aligned = ethereum.iloc[:min_length]
+    # Create a DataFrame with aligned data
+    data_aligned = pd.DataFrame(
+        {'SP500': sp500_aligned, 'Bitcoin': bitcoin_aligned, 'Gold': gold_aligned, 'Ethereum': ethereum_aligned})
+    # Calculate Pearson, Spearman, and Kendall Tau correlations
+    pearson_corr = data_aligned.corr(method='pearson')
+    spearman_corr = data_aligned.corr(method='spearman')
+    kendall_corr = data_aligned.corr(method='kendall')
+    pearson_corr_dict = pearson_corr.to_dict(orient='index')
+    spearman_corr_dict = spearman_corr.to_dict(orient='index')
+    kendall_corr_dict = kendall_corr.to_dict(orient='index')
+    return pearson_corr_dict, spearman_corr_dict, kendall_corr_dict
+
 def independent_indicator_view(request):
     aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
     aipha_date_obj1h, aipha_date_obj_end1h, aipha_predictions1h, aipha_enter_price1h, aipha_long_take_profit1h, aipha_short_take_profit1h = basic_aiphabot_1hr()
     aipha_date_obj4h, aipha_date_obj_end4h, aipha_predictions4h, aipha_enter_price4h, aipha_long_take_profit4h, aipha_short_take_profit4h = basic_aiphabot_4hrs()
     aipha_date_obj1d, aipha_date_obj_end1d, aipha_predictions1d, aipha_enter_price1d, aipha_long_take_profit1d, aipha_short_take_profit1d = basic_aiphabot_1d()
 
+    url_fng = 'https://api.alternative.me/fng/?limit=7&date_format=kr'
+    response_fng = requests.get(url_fng)
+    data_fng = response_fng.json().get('data', [])
+
+    url_global = 'https://api.coinlore.net/api/global/'
+    response_global = requests.get(url_global)
+    data_global = response_global.json()
+
+    kimchi_data = get_kimchi_data()
+
     context = {
+        # first column
         "aipha_long_prob_15m": aipha_predictions15m[0] * 100,
         "aipha_short_prob_15m": aipha_predictions15m[1] * 100,
         "aipha_date_obj15m": aipha_date_obj15m,
@@ -345,6 +394,13 @@ def independent_indicator_view(request):
         "aipha_enter_price1d": aipha_enter_price1d,
         "aipha_long_take_profit1d": aipha_long_take_profit1d,
         "aipha_short_take_profit1d": aipha_short_take_profit1d,
+
+        # second column
+        "data_fng": data_fng,
+
+        # third column
+        "data_global": data_global,
+        "kimchi_data": kimchi_data
     }
 
     return render(request, 'independent_indicator_views.html', context)
