@@ -8,6 +8,7 @@ import asyncio
 from io import StringIO
 from datetime import datetime, timedelta, timezone
 import pickle
+import openai
 
 # Third-party libraries imports
 import requests
@@ -444,6 +445,104 @@ def get_correlations():
     spearman_corr_dict = spearman_corr.to_dict(orient='index')
     kendall_corr_dict = kendall_corr.to_dict(orient='index')
     return pearson_corr_dict, spearman_corr_dict, kendall_corr_dict
+
+def get_technical_indicators(timeframe='1h'):
+    bitget = ccxt.bitget()
+    ohlcv = bitget.fetch_ohlcv("BTC/USDT:USDT", timeframe)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df["SMA_50"] = df["close"].rolling(window=50).mean()
+    df["EMA_50"] = df["close"].ewm(span=50, adjust=False).mean()
+    delta = df['close'].diff()
+    gain = (delta.where(delta > 0, 0)).fillna(0)
+    loss = (-delta.where(delta < 0, 0)).fillna(0)
+    avg_gain = gain.rolling(window=14).mean()
+    avg_loss = loss.rolling(window=14).mean()
+    rs = avg_gain / avg_loss
+    df['RSI'] = 100 - (100 / (1 + rs))
+    df['SMA_20'] = df['close'].rolling(window=20).mean()
+    df['STD_20'] = df['close'].rolling(window=20).std()
+    df['Upper_Bollinger'] = df['SMA_20'] + (df['STD_20'] * 2)
+    df['Lower_Bollinger'] = df['SMA_20'] - (df['STD_20'] * 2)
+    short_ema = df['close'].ewm(span=12, adjust=False).mean()
+    long_ema = df['close'].ewm(span=26, adjust=False).mean()
+    df['MACD'] = short_ema - long_ema
+    df['Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+    low_14 = df['low'].rolling(window=14).min()
+    high_14 = df['high'].rolling(window=14).max()
+    df['%K'] = 100 * ((df['close'] - low_14) / (high_14 - low_14))
+    df['%D'] = df['%K'].rolling(window=3).mean()
+    # get last four rows
+    sample = df.iloc[-4:, 1:]
+    sample_str = sample.to_string(index=False)
+    data = {"output_str":sample_str}
+    return data
+
+def fetch_ai_technical1h(request):
+    technical_data = get_technical_indicators(timeframe='1h')
+    technical_output = technical_data["output_str"]
+    # Craft the message
+    message = ("다음과 같은 1시간봉 비트코인 데이터가 주어졌을때:\n\n"
+               "{}\n\n"
+               "비트코인 가격 추세를 분석하고 총평을 해줘."
+               ).format(technical_output)
+    openai.api_key = settings.OPENAI_API_KEY
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "user", "content": message}
+        ],
+        temperature=0.5
+    )
+    chat_message = response["choices"][0]["message"]["content"]
+    return JsonResponse({'chat_message': chat_message})
+
+def fetch_ai_technical4h(request):
+    technical_data = get_technical_indicators(timeframe='4h')
+    technical_output = technical_data["output_str"]
+    # Craft the message
+    message = ("다음과 같은 4시간봉 비트코인 데이터가 주어졌을때:\n\n"
+               "{}\n\n"
+               "비트코인 가격 추세를 분석하고 총평을 해줘."
+               ).format(technical_output)
+    openai.api_key = settings.OPENAI_API_KEY
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "user", "content": message}
+        ],
+        temperature=0.5
+    )
+    chat_message = response["choices"][0]["message"]["content"]
+    return JsonResponse({'chat_message': chat_message})
+
+def fetch_ai_technical1d(request):
+    technical_data = get_technical_indicators(timeframe='1d')
+    technical_output = technical_data["output_str"]
+    # Craft the message
+    message = ("다음과 같은 일봉 비트코인 데이터가 주어졌을때:\n\n"
+               "{}\n\n"
+               "비트코인 가격 추세를 분석하고 총평을 해줘."
+               ).format(technical_output)
+    openai.api_key = settings.OPENAI_API_KEY
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "user", "content": message}
+        ],
+        temperature=0.5
+    )
+    chat_message = response["choices"][0]["message"]["content"]
+    return JsonResponse({'chat_message': chat_message})
+
+def fetch_ai_analysis(request, timeframe):
+    if timeframe == '1h':
+        return fetch_ai_technical1h(request)
+    elif timeframe == '4h':
+        return fetch_ai_technical4h(request)
+    elif timeframe == '1d':
+        return fetch_ai_technical1d(request)
+    else:
+        return JsonResponse({'chat_message': 'Invalid timeframe.'})
 
 
 def independent_indicator_view(request):

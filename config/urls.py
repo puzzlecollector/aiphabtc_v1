@@ -41,7 +41,8 @@ urlpatterns = [
          ai_indicator_views.search_news, name='search_news'),
     path('fetch-time-series-analysis-indicator-page/<str:timeframe>/',
          independent_indicator_views.time_series_analysis, name='time_series_analysis'),
-
+    path('fetch-gpt-analysis/<str:timeframe>/',
+         independent_indicator_views.fetch_ai_analysis, name='fetch_ai_analysis'),
 ]
 
 handler404 = 'common.views.page_not_found'
