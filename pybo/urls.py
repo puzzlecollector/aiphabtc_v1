@@ -69,4 +69,9 @@ urlpatterns = [
     # view other components
     path('board/<str:board_name>/',
          base_views.index, name='board_view'),
+
+    # fetch time series analysis for indicators page
+    path('fetch-time-series-analysis-indicator-page/<str:timeframe>/',
+         independent_indicator_views.time_series_analysis, name='time_series_analysis'),
+
 ]

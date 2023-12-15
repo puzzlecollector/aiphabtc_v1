@@ -396,7 +396,17 @@
                 </table>
             </p>
             <br>
-
+            <p>
+                <strong>시계열 예측 지표</strong>
+                <span class="tooltip-question-mark" data-toggle="tooltip" data-html="true" title="이 결과는 참고 목적으로만 사용되어야 하며, 투자 결정에 직접적으로 활용되어서는 안됩니다. 알파비트 인공지능 연구팀은 지속적인 연구와 개발을 통해 이러한 모델들의 정확성과 다양성을 향상시키기 위해 노력하고 있습니다.">[?]</span>
+                <p>다음은 비트코인의 종가를 예측하기 위해 사용된 다양한 시계열 예측 모델들의 결과입니다. 미래 6개의 타임스텝을 예측합니다.</p>
+                <div class="time-series-toggle-buttons">
+                        <button class="btn-ratio-toggle btn-ratio-toggle-1h">1h</button>
+                        <button class="btn-ratio-toggle btn-ratio-toggle-4h">4h</button>
+                        <button class="btn-ratio-toggle btn-ratio-toggle-1d">1d</button>
+                </div>
+                <canvas id="btcChart" width="500" height="500"></canvas>
+            </p>
         </div>
 
         <!-- Third Column -->
@@ -569,9 +579,96 @@
         ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)']
     );
 
+    // Time series chart functionality
+
+    let btcChart; // Global variable to hold the chart instance
+
+    function updateTimeSeries(timeframe) {
+        fetch(`/fetch-time-series-analysis-indicator-page/${timeframe}/`)
+            .then(response => response.json())
+            .then(data => {
+                var ctx = document.getElementById('btcChart').getContext('2d');
+                // Destroy the previous chart instance if it exists
+                if (btcChart) {
+                    btcChart.destroy();
+                }
+
+                btcChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Bitcoin Price',
+                                data: data.input_seq,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                fill: false,
+                            },
+                            {
+                                label: 'FB Prophet',
+                                data: data.prophet_forecast.map((point, i) => {
+                                    return {
+                                        x: data.labels[data.labels.length - data.prophet_forecast.length + i],
+                                        y: point
+                                    };
+                                }),
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                fill: false,
+                                pointBackgroundColor: 'rgba(255, 99, 132, 1)', // this sets the color of the points
+                            },
+                            {
+                                label: 'ARIMA',
+                                data: data.arima_forecast.map((point, i) => {
+                                    return {
+                                        x: data.labels[data.labels.length - data.arima_forecast.length + i],
+                                        y: point
+                                    };
+                                }),
+                                borderColor: 'rgba(0, 128, 0, 1)',
+                                fill: false,
+                                pointBackgroundColor: 'rgba(0, 128, 0, 1)', // this sets the color of the points
+                            },
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time',
+                                },
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'USDT',
+                                },
+                            },
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                            },
+                        },
+                    },
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching forecast data:", error);
+                // Optionally, update the UI to show an error message
+            });
+    }
+
+    // Event listeners for time frame toggle buttons
+    document.querySelector('.btn-ratio-toggle-1h').addEventListener('click', function() { updateTimeSeries('1h'); });
+    document.querySelector('.btn-ratio-toggle-4h').addEventListener('click', function() { updateTimeSeries('4h'); });
+    document.querySelector('.btn-ratio-toggle-1d').addEventListener('click', function() { updateTimeSeries('1d'); });
+
     // Default to 1-hour bot prediction on page load
     document.addEventListener('DOMContentLoaded', function() {
         toggleBotPrediction('1h');
+        updateTimeSeries('1h'); // Load 1-hour chart analysis by default
     });
 </script>
 

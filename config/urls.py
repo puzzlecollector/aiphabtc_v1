@@ -19,7 +19,7 @@ from django.urls import path, include
 from pybo.views import base_views
 from django.conf import settings
 from django.conf.urls.static import static
-from pybo.views import indicator_views, ai_indicator_views, profile_click_views
+from pybo.views import indicator_views, ai_indicator_views, profile_click_views, independent_indicator_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,6 +39,8 @@ urlpatterns = [
          ai_indicator_views.time_series_views, name='fetch_forecast'),
     path('search_news/',
          ai_indicator_views.search_news, name='search_news'),
+    path('fetch-time-series-analysis-indicator-page/<str:timeframe>/',
+         independent_indicator_views.time_series_analysis, name='time_series_analysis'),
 
 ]
 

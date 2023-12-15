@@ -6,8 +6,7 @@ import time
 import json
 import asyncio
 from io import StringIO
-from datetime import datetime, timedelta
-from datetime import timezone  # This is duplicated with the above import, so combined them
+from datetime import datetime, timedelta, timezone
 import pickle
 
 # Third-party libraries imports
@@ -23,7 +22,6 @@ import torch.nn as nn
 from scipy.stats import pearsonr, spearmanr
 from statsmodels.tsa.stattools import grangercausalitytests, coint
 from statsmodels.tsa.arima.model import ARIMA
-from pytz import timezone
 from prophet import Prophet
 from joblib import dump, load
 from sklearn.preprocessing import StandardScaler
@@ -343,6 +341,84 @@ def get_correlations():
     spearman_corr_dict = spearman_corr.to_dict(orient='index')
     kendall_corr_dict = kendall_corr.to_dict(orient='index')
     return pearson_corr_dict, spearman_corr_dict, kendall_corr_dict
+
+def get_predictions_fbprophet(btc_sequence, timestamps, timeframe):
+    df = pd.DataFrame({
+        'ds': timestamps,
+        'y': btc_sequence,
+    })
+    model = Prophet()
+    model.fit(df)
+    future = model.make_future_dataframe(periods=6, freq='1H')
+    if timeframe == "1h":
+        future = model.make_future_dataframe(periods=6, freq="1H")
+    elif timeframe == "4h":
+        future = model.make_future_dataframe(periods=6, freq="4H")
+    elif timeframe == "1d":
+        future = model.make_future_dataframe(periods=6, freq="1D")
+    # future = model.make_future_dataframe(periods=6, freq='30min')
+    forecast = model.predict(future)
+    yhat = forecast['yhat'].iloc[-6:].values
+    return yhat
+
+def get_predictions_arima(btc_sequence, p=1, d=1, q=1, steps_ahead=6):
+    try:
+        # Differencing
+        btc_diff = np.diff(btc_sequence, n=d)
+        # Fit ARIMA model
+        model = ARIMA(btc_diff, order=(p, 0, q))
+        fitted_model = model.fit()
+        # Forecast
+        forecast_diff = fitted_model.forecast(steps=steps_ahead)
+        # Invert differencing
+        forecast = [btc_sequence[-1]]
+        for diff in forecast_diff:
+            forecast.append(forecast[-1] + diff)
+        return forecast[1:]
+    except Exception as e:
+        print(f"Model fitting failed: {str(e)}")
+        return np.zeros((steps_ahead,))
+
+def time_series_analysis(request, timeframe='1h'):
+    bitget = ccxt.bitget()
+    btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", timeframe)
+    btc = pd.DataFrame(btcusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    btc_close = btc['close'].values
+    labels = [
+        datetime.utcfromtimestamp(t / 1000)
+        .replace(tzinfo=timezone.utc)
+        .astimezone(zoneinfo.ZoneInfo('Asia/Seoul'))  # Use ZoneInfo instead of timezone
+        .strftime('%Y-%m-%d %H:%M:%S')
+        for t in btc['timestamp']
+    ]
+    # Get predictions
+    prophet_forecast = get_predictions_fbprophet(btc_close, labels, timeframe)
+    arima_forecast = get_predictions_arima(btc_close)
+    # Convert numpy float32 to Python float for JSON serialization
+    prophet_forecast = [float(f) for f in prophet_forecast]
+    arima_forecast = [float(f) for f in arima_forecast]
+    # Append labels for forecast
+    last_label = labels[-1]
+    last_timestamp = datetime.strptime(last_label, '%Y-%m-%d %H:%M:%S')
+    if timeframe == '1h':
+        interval = timedelta(minutes=60)
+    elif timeframe == '4h':
+        interval = timedelta(minutes=240)
+    elif timeframe == '1d':
+        interval = timedelta(minutes=1440)
+    # Generate next 6 timestamps
+    new_labels = [last_timestamp + interval * i for i in range(1, 7)]
+    new_labels_str = [t.strftime('%Y-%m-%d %H:%M:%S') for t in new_labels]
+    # Append new labels to existing labels
+    labels.extend(new_labels_str)
+    context = {
+        "input_seq": [float(f) for f in list(btc_close[-30:])],  # Convert numpy float32 to Python float
+        "prophet_forecast": prophet_forecast,
+        "arima_forecast": arima_forecast,
+        "labels": labels[-36:],
+    }
+    return JsonResponse(context)
+
 
 def independent_indicator_view(request):
     aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
