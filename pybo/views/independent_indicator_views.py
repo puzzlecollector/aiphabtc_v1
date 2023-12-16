@@ -603,6 +603,128 @@ def get_sentiment_scores(df):
     scores /= int(df.shape[0])
     return scores # average scores
 
+# get technical voters
+def get_technical_voters(timeframe="1h"):
+    bitget = ccxt.bitget()
+    ohlcv = bitget.fetch_ohlcv("BTC/USDT:USDT", timeframe)
+    chart_df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    chart_df = preprocess(chart_df)
+    hours, days, months = [], [], []
+    for dt in chart_df["datetime"]:
+        dtobj = pd.to_datetime(dt)
+        hour = dtobj.hour
+        day = dtobj.day
+        month = dtobj.month
+        hours.append(hour)
+        days.append(day)
+        months.append(month)
+    chart_df["hours"] = hours
+    chart_df["days"] = days
+    chart_df["months"] = months
+    chart_df.set_index(pd.DatetimeIndex(chart_df["datetime"]), inplace=True)
+
+    # RSI
+    rsi = chart_df.ta.rsi(length=14)
+    rsi_df = rsi.to_frame()
+    rsi_vals = rsi_df["RSI_14"].values
+
+    # STOCH
+    stoch = chart_df.ta.stoch(high='high', low='low', close='close')
+    stoch_vals = stoch["STOCHk_14_3_3"].values
+
+    # STOCHRSI
+    stochrsi = chart_df.ta.stochrsi(close='close')
+    stochrsi_vals = stochrsi["STOCHRSIk_14_14_3_3"].values
+
+    # MACD
+    macd = chart_df.ta.macd(close='close')
+    macd_vals = macd["MACD_12_26_9"].values
+
+    # ADX
+    adx = chart_df.ta.adx(high='high', low='low', close='close')
+    adx_vals = adx['ADX_14'].values
+
+    # Williams %R
+    williams_r = chart_df.ta.willr(high='high', low='low', close='close')
+    williams_r = williams_r.to_frame()
+    williams_r_vals = williams_r["WILLR_14"].values
+
+    # CCI
+    cci = chart_df.ta.cci(high='high', low='low', close='close')
+    cci = cci.to_frame()
+    cci_vals = cci["CCI_14_0.015"].values
+
+    # ATR
+    atr = chart_df.ta.atr(high='high', low='low', close='close')
+    atr = atr.to_frame()
+    atr_vals = atr["ATRr_14"].values
+
+    # Highs/Lows
+    highs = chart_df["close"].rolling(window=14).max()
+    lows = chart_df["close"].rolling(window=14).min()
+    highs_lows_diff = highs - lows
+    highs_lows_diff_df = highs_lows_diff.to_frame()
+    highs_lows_vals = highs_lows_diff_df["close"].values
+
+    # Ultimate Oscillator
+    uo = chart_df.ta.uo(high='high', low='low', close='close')
+    uo = uo.to_frame()
+    uo_vals = uo["UO_7_14_28"].values
+
+    # ROC
+    roc = chart_df.ta.roc(close='close', length=10)
+    roc = roc.to_frame()
+    roc_vals = roc["ROC_10"].values
+
+    # Bull/Bear Power
+    power = chart_df['close'] - chart_df.ta.ema(close='close', length=13)
+    power = power.to_frame()
+    power_vals = power[0].values
+
+    indicators = {
+        'RSI': rsi_vals,
+        'STOCH': stoch_vals,
+        'STOCHRSI': stochrsi_vals,
+        'MACD': macd_vals,
+        'ADX': adx_vals,
+        'Williams %R': williams_r_vals,
+        'CCI': cci_vals,
+        'ATR': atr_vals,
+        'Highs/Lows': highs_lows_vals,
+        'Ultimate Oscillator': uo_vals,
+        'ROC': roc_vals,
+        'Bull/Bear Power': power_vals
+    }
+
+    actions = {
+        'RSI': 'Long' if indicators['RSI'][-1] < 30 else 'Short' if indicators['RSI'][-1] > 70 else 'Neutral',
+        'STOCH': 'Long' if indicators['STOCH'][-1] < 20 else 'Short' if indicators['STOCH'][-1] > 80 else 'Neutral',
+        'STOCHRSI': 'Long' if indicators['STOCHRSI'][-1] < 0.2 else 'Short' if indicators['STOCHRSI'][-1] > 0.8 else 'Neutral',
+        'MACD': 'Long' if indicators['MACD'][-1] > 0 else 'Short' if indicators['MACD'][-1] < 0 else 'Neutral',
+        'ADX': 'Long' if indicators['ADX'][-1] > 25 else 'Neutral',
+        'Williams %R': 'Long' if indicators['Williams %R'][-1] < -80 else 'Short' if indicators['Williams %R'][-1] > -20 else 'Neutral',
+        'CCI': 'Long' if indicators['CCI'][-1] < -100 else 'Short' if indicators['CCI'][-1] > 100 else 'Neutral',
+        'ATR': 'High Volatility' if indicators['ATR'][-1] > indicators['ATR'][-2] else 'Low Volatility',
+        'Highs/Lows': 'Long' if indicators['Highs/Lows'][-1] > 0 else 'Short' if indicators['Highs/Lows'][-1] < 0 else 'Neutral',
+        'Ultimate Oscillator': 'Long' if indicators['Ultimate Oscillator'][-1] < 30 else 'Short' if indicators['Ultimate Oscillator'][-1] > 70 else 'Neutral',
+        'ROC': 'Long' if indicators['ROC'][-1] > 0 else 'Short' if indicators['ROC'][-1] < 0 else 'Neutral',
+        'Bull/Bear Power': 'Long' if indicators['Bull/Bear Power'][-1] > 0 else 'Short' if indicators['Bull/Bear Power'][-1] < 0 else 'Neutral'
+    }
+
+    buy_count = sum(1 for action in actions.values() if action == 'Long')
+    sell_count = sum(1 for action in actions.values() if action == 'Short')
+    neutral_count = sum(1 for action in actions.values() if action == 'Neutral')
+
+    if buy_count > sell_count and buy_count > neutral_count:
+        recommended_action = 'Long'
+    elif sell_count > buy_count and sell_count > neutral_count:
+        recommended_action = 'Short'
+    else:
+        recommended_action = 'Neutral'
+
+    return actions, recommended_action
+
+
 def independent_indicator_view(request):
     aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
     aipha_date_obj1h, aipha_date_obj_end1h, aipha_predictions1h, aipha_enter_price1h, aipha_long_take_profit1h, aipha_short_take_profit1h = basic_aiphabot_1hr()
@@ -626,6 +748,10 @@ def independent_indicator_view(request):
     scraped_data = df.to_dict(orient='records')  # convert DataFrame to list of dicts
     avg_sentiment_scores_percentage = [round(score * 100, 2) for score in avg_sentiment_scores]
     sentiment_labels = ['호재', '악재', '중립']
+
+    actions1h, recommended_action1h = get_technical_voters(timeframe="1h")
+    actions4h, recommended_action4h = get_technical_voters(timeframe="4h")
+    actions1d, recommended_action1d = get_technical_voters(timeframe="1d")
 
     context = {
         # first column
@@ -661,6 +787,13 @@ def independent_indicator_view(request):
         "aipha_enter_price1d": aipha_enter_price1d,
         "aipha_long_take_profit1d": aipha_long_take_profit1d,
         "aipha_short_take_profit1d": aipha_short_take_profit1d,
+
+        "technical_actions_1h": actions1h,
+        "technical_recommended_action_1h": recommended_action1h,
+        "technical_actions_4h": actions4h,
+        "technical_recommended_action_4h": recommended_action4h,
+        "technical_actions_1d": actions1d,
+        "technical_recommended_action_1d": recommended_action1d,
 
         # second column
         "data_fng": data_fng,

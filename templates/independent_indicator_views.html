@@ -236,6 +236,33 @@
         color: white;
         font-weight: bold;
     }
+
+    .indicators-list {
+        margin-top: 20px;
+    }
+
+    .indicators-list table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .indicators-list th, .indicators-list td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .indicators-list th {
+        background-color: #f8f9fa;
+    }
+
+    .indicators-list tr:hover {
+        background-color: #f2f2f2;
+    }
+
+    .indicators-list td {
+        font-size: 14px;
+    }
 </style>
 
 <!-- Main Container -->
@@ -364,6 +391,86 @@
                         <br>
                     </p>
                     <br>
+                    <p>
+                        <strong>기술적 지표 투표 결과</strong>
+                        <div class="btn-group" role="group" aria-label="Technical Indicators Timeframes">
+                            <button type="button" id="btn-technical-1h" class="btn btn-outline-secondary btn-sm">1h</button>
+                            <button type="button" id="btn-technical-4h" class="btn btn-outline-secondary btn-sm">4h</button>
+                            <button type="button" id="btn-technical-1d" class="btn btn-outline-secondary btn-sm">1d</button>
+                        </div>
+                        <div id="technical-indicators-1h">
+                            <div class="summary">
+                                <span>Summary: <strong>{{ technical_recommended_action_1h }}</strong></span>
+                            </div>
+                            <div class="indicators-list">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for indicator, value in technical_actions_1h.items %}
+                                        <tr>
+                                            <td>{{ indicator }}</td>
+                                            <td>{{ value }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="technical-indicators-4h">
+                            <div class="summary">
+                                <span>Summary: <strong>{{ technical_recommended_action_4h }}</strong></span>
+                            </div>
+                            <div class="indicators-list">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for indicator, value in technical_actions_1h.items %}
+                                        <tr>
+                                            <td>{{ indicator }}</td>
+                                            <td>{{ value }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="technical-indicators-1d">
+                            <div class="summary">
+                                <span>Summary: <strong>{{ technical_recommended_action_1d }}</strong></span>
+                            </div>
+                            <div class="indicators-list">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for indicator, value in technical_actions_1d.items %}
+                                        <tr>
+                                            <td>{{ indicator }}</td>
+                                            <td>{{ value }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </p>
                 </div>
         </div>
 
@@ -905,10 +1012,24 @@
     document.querySelector('.btn-ratio-toggle-4h').addEventListener('click', function() { updateTimeSeries('4h'); });
     document.querySelector('.btn-ratio-toggle-1d').addEventListener('click', function() { updateTimeSeries('1d'); });
 
+    // function to toggle the display of technical indicators
+    function toggleTechnicalIndicators(timeframe) {
+        document.getElementById('technical-indicators-1h').style.display = 'none';
+        document.getElementById('technical-indicators-4h').style.display = 'none';
+        document.getElementById('technical-indicators-1d').style.display = 'none';
+        // Show the selected timeframe's technical indicators
+        document.getElementById('technical-indicators-' + timeframe).style.display = 'block';
+    }
+
+    document.getElementById('btn-technical-1h').addEventListener('click', function() { toggleTechnicalIndicators('1h'); });
+    document.getElementById('btn-technical-4h').addEventListener('click', function() { toggleTechnicalIndicators('4h'); });
+    document.getElementById('btn-technical-1d').addEventListener('click', function() { toggleTechnicalIndicators('1d'); });
+
     // Default to 1-hour bot prediction on page load
     document.addEventListener('DOMContentLoaded', function() {
         toggleBotPrediction('1h');
         updateTimeSeries('1h'); // Load 1-hour chart analysis by default
+        toggleTechnicalIndicators('1h'); // Load 1-hour technical voter by default
     });
 </script>
 
