@@ -469,7 +469,51 @@
                                 </table>
                             </div>
                         </div>
+                        <br>
+                        <!-- Deep Learning Model Predictions -->
+                        <div class="deep-learning-predictions">
+                            <h5>딥러닝 모델 예측 결과</h5>
+                            <p>일봉 (1d) 종가에 대한 Long과 Short 확률을 보여주는 LSTM과 Transformer Encoder 모델 예측입니다.</p>
 
+                            <!-- LSTM Model Predictions -->
+                            <div class="model-predictions">
+                                <h6>LSTM 모델 예측</h6>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">Long 확률:</span>
+                                    <span class="prediction-value">{{ LSTM_long_prob }}%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ LSTM_long_prob }}%;" aria-valuenow="{{ LSTM_long_prob }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">Short 확률:</span>
+                                    <span class="prediction-value">{{ LSTM_short_prob }}%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" style="width: {{ LSTM_short_prob }}%;" aria-valuenow="{{ LSTM_short_prob }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+
+                            <!-- Transformer Encoder Model Predictions -->
+                            <div class="model-predictions">
+                                <h6>Transformer Encoder 모델 예측</h6>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">Long 확률:</span>
+                                    <span class="prediction-value">{{ transformer_long_prob }}%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ transformer_long_prob }}%;" aria-valuenow="{{ transformer_long_prob }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="prediction-item">
+                                    <span class="prediction-label">Short 확률:</span>
+                                    <span class="prediction-value">{{ transformer_short_prob }}%</span>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" style="width: {{ transformer_short_prob }}%;" aria-valuenow="{{ transformer_short_prob }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </p>
                 </div>
         </div>

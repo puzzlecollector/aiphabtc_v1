@@ -40,6 +40,7 @@ from bs4 import BeautifulSoup
 from dateutil import parser
 from tqdm import tqdm
 import zoneinfo
+import joblib
 
 # Django specific imports
 from django.shortcuts import render
@@ -725,6 +726,134 @@ def get_technical_voters(timeframe="1h"):
     return actions, recommended_action
 
 
+class LSTMClassifier(nn.Module):
+    def __init__(self, input_size, hidden_layer_size, output_size):
+        super().__init__()
+        self.hidden_layer_size = hidden_layer_size
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, batch_first=True)
+        self.linear = nn.Linear(hidden_layer_size, output_size)
+    def forward(self, input_seq):
+        # Initialize hidden and cell states with zeros
+        h0 = torch.zeros(1, input_seq.size(0), self.hidden_layer_size).to(input_seq.device)
+        c0 = torch.zeros(1, input_seq.size(0), self.hidden_layer_size).to(input_seq.device)
+        lstm_out, _ = self.lstm(input_seq, (h0, c0))
+        last_time_step = lstm_out[:, -1, :]
+        predictions = self.linear(last_time_step)
+        return predictions
+
+# LSTM inference function
+def infer_LSTM():
+    input_size = 7
+    hidden_layer_size = 64
+    output_size = 2
+    LSTM_test = LSTMClassifier(input_size, hidden_layer_size, output_size)
+    checkpoint = torch.load("pybo/views/best_lstm.pt", map_location=torch.device('cpu')) # load model on CPU - may affect performance
+    LSTM_test.load_state_dict(checkpoint)
+    test_scaler = joblib.load("pybo/views/LSTM_minmax_scaler.pkl")
+
+    bitget = ccxt.bitget()
+    ohlcv = bitget.fetch_ohlcv("BTC/USDT:USDT", "1d")
+    chart_df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    chart_df = preprocess(chart_df)
+    days, months = [], []
+    for dt in chart_df["datetime"]:
+        dtobj = pd.to_datetime(dt)
+        day = dtobj.day
+        month = dtobj.month
+        days.append(day)
+        months.append(month)
+    chart_df["month"] = months
+    chart_df["day"] = days
+    chart_df.drop(columns={"timestamp", "datetime"}, inplace=True)
+
+    test_scaled_features = test_scaler.transform(chart_df)
+    test_input = test_scaled_features[-15:-1]  # LSTM uses 14 days
+    test_input = test_input.reshape((-1, 14, 7))
+    test_input = torch.tensor(test_input, dtype=torch.float32)
+    LSTM_test.eval()
+    with torch.no_grad():
+        output = LSTM_test(test_input)
+        probs = nn.Softmax(dim=-1)(output)[0]
+        probs = probs.detach().cpu().numpy()
+    LSTM_long_prob = round(probs[1] * 100, 2)
+    LSTM_short_prob = round(probs[0] * 100, 2)
+    return LSTM_long_prob, LSTM_short_prob
+
+
+# Transformer Encoder Classifier
+class TransformerClassifier(nn.Module):
+    def __init__(self, input_size, num_layers, num_heads, dim_feedforward, output_size):
+        super(TransformerClassifier, self).__init__()
+
+        # Embedding layer for positional encoding
+        self.embedding = nn.Linear(input_size, input_size)
+
+        transformer_layer = nn.TransformerEncoderLayer(
+            d_model=input_size,
+            nhead=num_heads,
+            dim_feedforward=dim_feedforward,
+            batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(transformer_layer, num_layers=num_layers)
+        # Linear layer for final output
+        self.fc = nn.Linear(input_size, output_size)
+
+    def forward(self, x):
+        # Positional embedding
+        x = self.embedding(x)
+        # Passing through the transformer layers
+        x = self.transformer_encoder(x)
+        # Taking the output of the last time step
+        x = x[:, -1, :]
+        # Output layer
+        output = self.fc(x)
+        return output
+
+# Transformer Encoder inference function
+def infer_Transformer():
+    input_size = 7  # As per your dataset
+    num_layers = 3  # Number of Transformer layers
+    num_heads = 1  # Number of heads in Multi-Head Attention
+    dim_feedforward = 512  # Feedforward dimension
+    output_size = 2  # Number of output classes
+
+    Transformer_test = TransformerClassifier(input_size, num_layers, num_heads, dim_feedforward, output_size)
+    checkpoint = torch.load("pybo/views/best_transformer_encoder.pt", map_location=torch.device('cpu'))
+    Transformer_test.load_state_dict(checkpoint)
+
+    test_scaler = joblib.load("pybo/views/Transformer_minmax_scaler.pkl")
+
+    bitget = ccxt.bitget()
+    ohlcv = bitget.fetch_ohlcv("BTC/USDT:USDT", "1d")
+    chart_df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    chart_df = preprocess(chart_df)
+    days, months = [], []
+    for dt in chart_df["datetime"]:
+        dtobj = pd.to_datetime(dt)
+        day = dtobj.day
+        month = dtobj.month
+        days.append(day)
+        months.append(month)
+    chart_df["month"] = months
+    chart_df["day"] = days
+    chart_df.drop(columns={"timestamp", "datetime"}, inplace=True)
+
+    test_scaled_features = test_scaler.transform(chart_df)
+    test_input = test_scaled_features[-15:-1]
+    test_input = test_input.reshape((-1, 14, 7))
+    test_input = torch.tensor(test_input, dtype=torch.float32)
+
+    Transformer_test.eval()
+    with torch.no_grad():
+        output = Transformer_test(test_input)
+        probs = nn.Softmax(dim=-1)(output)[0]
+        probs = probs.detach().cpu().numpy()
+
+    Transformer_long_prob = round(probs[1] * 100, 2)
+    Transformer_short_prob = round(probs[0] * 100, 2)
+    return Transformer_long_prob, Transformer_short_prob
+
+
 def independent_indicator_view(request):
     aipha_date_obj15m, aipha_date_obj_end15m, aipha_predictions15m, aipha_enter_price15m = aiphabot_15mins()
     aipha_date_obj1h, aipha_date_obj_end1h, aipha_predictions1h, aipha_enter_price1h, aipha_long_take_profit1h, aipha_short_take_profit1h = basic_aiphabot_1hr()
@@ -752,6 +881,9 @@ def independent_indicator_view(request):
     actions1h, recommended_action1h = get_technical_voters(timeframe="1h")
     actions4h, recommended_action4h = get_technical_voters(timeframe="4h")
     actions1d, recommended_action1d = get_technical_voters(timeframe="1d")
+
+    LSTM_long_prob, LSTM_short_prob = infer_LSTM()
+    transformer_long_prob, transformer_short_prob = infer_Transformer()
 
     context = {
         # first column
@@ -794,6 +926,12 @@ def independent_indicator_view(request):
         "technical_recommended_action_4h": recommended_action4h,
         "technical_actions_1d": actions1d,
         "technical_recommended_action_1d": recommended_action1d,
+
+        "LSTM_long_prob": LSTM_long_prob,
+        "LSTM_short_prob": LSTM_short_prob,
+
+        "transformer_long_prob": transformer_long_prob,
+        "transformer_short_prob": transformer_short_prob,
 
         # second column
         "data_fng": data_fng,
