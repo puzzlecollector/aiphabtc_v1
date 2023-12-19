@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views, indicator_views, profile_click_views, component_views, ai_indicator_views, trading_bot_views, independent_indicator_views
+from .views import base_views, question_views, answer_views, comment_views, vote_views, free_board_views, indicator_views, profile_click_views, component_views, ai_indicator_views, trading_bot_views, independent_indicator_views, nlp_dashboard_views
 app_name = "pybo"
 
 urlpatterns = [
@@ -74,4 +74,7 @@ urlpatterns = [
     path('fetch-time-series-analysis-indicator-page/<str:timeframe>/',
          independent_indicator_views.time_series_analysis, name='time_series_analysis'),
 
+    # NLP related indicator page
+    path('nlp_indicators/',
+         nlp_dashboard_views.nlp_views, name="nlp_dashboard"),
 ]

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load pybo_filter %}
+{% block content %}
+{% load static %}
+
+<style>
+    .sidebar-item {
+        border-bottom: 2px solid #000;  /* Only the bottom border */
+        margin-bottom: 12px;            /* Space between items */
+        border-radius: 5px;             /* Optional: rounds the corners */
+    }
+
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 10px 0;  /* Adjusted padding to make it slimmer */
+        font-size: 0.8rem;  /* You can adjust the font size accordingly */
+    }
+
+    .container.my-3 {
+        padding-bottom: 50px;  /* Adjusted space to ensure no overlap with the footer */
+    }
+
+</style>
+
+
+<div class="col-md-10">
+<div class="container my-3">
+    <h3>AIPHABTC 비트코인 패턴매칭 분석 대시보드</h3>
+    <div class="row">
+        <div class="col-12 text-right">
+        <!-- Platform Toggle Buttons with a margin-bottom for spacing -->
+            <div class="btn-group mb-3 d-inline-block" role="group" aria-label="Platform Toggle">
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'upbit.png' %}" alt="Upbit Icon" style="height: 20px; margin-right: 5px;">
+                    Upbit
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'bitget_v2.png' %}" alt="Bitget Icon" style="height: 20px; margin-right: 5px;">
+                    Bitget
+                </button>
+            </div>
+        </div>
+        <div class="col-12 text-right">
+            <!-- Language Toggle Buttons -->
+            <div class="btn-group d-inline-block" role="group" aria-label="Language Toggle">
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'korean.png' %}" alt="Korean Flag" style="height: 20px; margin-right: 5px;">
+                    한글
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm">
+                    <img src="{% static 'english.png' %}" alt="English Flag" style="height: 20px; margin-right: 5px;">
+                    English
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corrected Two-Column Layout Starts Here -->
+    <div class="row">
+        <div class="col-12">
+            <div class="sidebar-item">뉴스 패턴 매칭 지표</div>
+            <p>알파비트 인공지능 팀이 개발한 AI는 입력된 뉴스 제목과 내용에 문맥적으로 유사한 과거 뉴스를 추천하고, 해당 과거 뉴스가 발표된 시점의 차트 데이터를 보여줍니다. 이는 딥러닝 언어 모델을 통해 텍스트 임베딩을 계산하고, 이를 텍스트 유사도 분석에 활용하여 이루어집니다.</p>
+            <div>
+                <label for="topKRange">조회할 상위 결과 수 (5-20): </label>
+                <input type="range" id="topKRange" name="topK" min="5" max="20" value="5">
+                <span id="topKValue">5</span>
+            </div>
+            <div>
+                <form>
+                    {% csrf_token %}
+                    <textarea id="newsText" name="news_text", rows="8" cols="100" placeholder="뉴스 제목과 내용을 입력하세요."></textarea><br>
+                    <button type="button" id="searchButton" class="btn btn-primary">검색</button>
+                </form>
+                <div id="loading" style="display: none;">AI가 계산중입니다...</div>
+                <div id="results"></div>
+            </div>
+            <br>
+            <div class="sidebar-item">차트 패턴 매칭 지표</div>
+                <p>현재 가장 최근 차트 구간과 가장 유사한 차트 구간을 보여줍니다.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+<form id="searchForm" method="get" action="{% url 'index' %}">
+    <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
+    <input type="hidden" id="page" name="page" value="{{ page }}">
+    <input type="hidden" id="so" name="so" value="{{ so }}">
+</form>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+    var chartDataStorage = {};
+    document.getElementById("searchButton").addEventListener("click", function() {
+        document.getElementById("loading").style.display = "block";
+        var newsText = document.getElementById("newsText").value;
+        var topK = document.getElementById("topKRange").value;
+
+        // Get the CSRF token from the cookie
+        var csrfToken = getCookie('csrftoken');
+
+        fetch("/news_similarity/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken  // Include the CSRF token in the headers
+            },
+            body: JSON.stringify({ news_text: newsText, top_k: topK }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';  // Clear previous results
+
+            data.results.forEach(function(result, index) {
+                // Store chart data in the global object
+                chartDataStorage[index] = {
+                    chart_data_30m: result.chart_data_30m,
+                    chart_data_1d: result.chart_data_1d
+                };
+
+                var resultDiv = document.createElement('div');
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <h5> Rank ${index + 1} </h5>
+                    <p>${result.text}</p>
+                    <p><strong>문맥형 유사도:</strong> ${result.similarity}%</p>
+                    <p><strong>날짜:</strong> ${result.date}</p>
+                    <button class="btn btn-secondary btn-sm" onclick="updateChart('chart${index}', 'chart_data_30m')">30m Chart</button>
+                    <button class="btn btn-secondary btn-sm" onclick="updateChart('chart${index}', 'chart_data_1d')">1d Chart</button>
+                    <div class="chart" id="chart${index}"></div>
+                `;
+                resultsContainer.appendChild(resultDiv);
+
+                // Default plot 30m chart
+                updateChart(`chart${index}`, 'chart_data_30m');
+            });
+            document.getElementById("loading").style.display = "none";
+        })
+        .catch(error => {
+            console.error("Error fetching news similarity results:", error);
+            document.getElementById("loading").style.display = "none";
+        });
+    });
+
+    function updateChart(chartId, chartDataType) {
+        var index = chartId.replace('chart', ''); // Extract index from chartId
+        var chartData = chartDataStorage[index][chartDataType]; // Get the correct chart data from the global object
+
+        var chartDiv = document.getElementById(chartId);
+        Plotly.newPlot(chartDiv, [
+            {
+                type: 'scatter',
+                mode: 'lines',
+                x: chartData.x,
+                y: chartData.y,
+            },
+        ], {
+            title: 'Bitcoin Price Chart',
+            xaxis: { title: 'Time' },
+            yaxis: { title: 'USDT' },
+        });
+    }
+
+    // Add an event listener to update the displayed value when the slider changes
+    document.getElementById("topKRange").addEventListener("input", function() {
+        document.getElementById("topKValue").innerText = this.value;
+    });
+
+    // Function to get a cookie by name
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+<div class="footer">
+    <div class="container text-center">
+        <p>제휴제안: <a href="mailto:aiphabtcbusiness@gmail.com">aiphabtcbusiness@gmail.com | 본 지표와 봇들은 투자 권유용이 아닙니다. 투자는 항상 본인이 신중하게 결정해서 하시길 바랍니다.</a></p>
+    </div>
+</div>
+{% endblock %}

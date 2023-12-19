@@ -19,7 +19,7 @@ from django.urls import path, include
 from pybo.views import base_views
 from django.conf import settings
 from django.conf.urls.static import static
-from pybo.views import indicator_views, ai_indicator_views, profile_click_views, independent_indicator_views
+from pybo.views import indicator_views, ai_indicator_views, profile_click_views, independent_indicator_views, nlp_dashboard_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,6 +43,8 @@ urlpatterns = [
          independent_indicator_views.time_series_analysis, name='time_series_analysis'),
     path('fetch-gpt-analysis/<str:timeframe>/',
          independent_indicator_views.fetch_ai_analysis, name='fetch_ai_analysis'),
+    path('news_similarity/',
+         nlp_dashboard_views.search_news, name="nlp_dashboard_search_news"),
 ]
 
 handler404 = 'common.views.page_not_found'
