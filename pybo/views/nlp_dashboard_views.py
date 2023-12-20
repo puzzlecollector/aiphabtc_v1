@@ -38,6 +38,7 @@ from plotly.io import to_html
 import plotly.io as pio
 from plotly.graph_objs import Scatter
 import plotly.express as px
+from tslearn.metrics import dtw
 
 
 # news similarity indicator
@@ -58,7 +59,6 @@ def get_query_embedding(query):
         query_embedding = embedding_model(**encoded_query)[0][:, 0, :]
         query_embedding = query_embedding.numpy()
     return query_embedding
-
 
 def convert_json_chart_data_to_pd(json_file: str):
     with open(json_file) as f:
@@ -166,6 +166,74 @@ def search_news(request):
 
         # Return the results as JSON
         return JsonResponse({'results': results})
+
+# chart pattern matching functionality
+def preprocess(df):
+    bitget = ccxt.bitget()
+    dates = df["timestamp"].values
+    timestamps = []
+    korean_timezone = zoneinfo.ZoneInfo("Asia/Seoul")
+    for i in range(len(dates)):
+        date_string = bitget.iso8601(int(dates[i]))
+        date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
+        korean_time = date_object.astimezone(korean_timezone)
+        formatted_korean_time = korean_time.strftime("%Y-%m-%d %H:%M:%S")
+        timestamps.append(formatted_korean_time)
+    df["datetime"] = timestamps
+    df = df.drop(columns={"timestamp"})
+    return df
+
+def compute_similarity(series1, series2):
+    return dtw(series1, series2)
+
+def search_chart_pattern(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        topk = int(data.get("top_k", 5))
+        topk = max(5, min(topk, 20))
+
+        # get recent pattern
+        bitget = ccxt.bitget()
+        btcusdt = bitget.fetch_ohlcv("BTC/USDT:USDT", "1d")
+        chart_df = pd.DataFrame(btcusdt, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        chart_df = preprocess(chart_df)
+        chart_df = chart_df.iloc[-21:]
+        current_pattern = chart_df["close"].values
+        current_datetime = chart_df["datetime"].values
+
+        # get historical patterns
+        historical_df = pd.read_feather("pybo/views/BTC_USDT-1d_.feather")
+        historical_df["date"] = pd.to_datetime(historical_df["date"])
+        historical_data = historical_df["close"].values
+        historical_date = historical_df["date"].values
+
+        similarities = []
+        for i in range(len(historical_data) - len(current_pattern)):
+            past_pattern = historical_data[i:i+len(current_pattern)]
+            similarity = compute_similarity(current_pattern, past_pattern)
+            similarities.append((i, similarity))
+        top_k_similar = sorted(similarities, key=lambda x: x[1])[:topk]
+
+        results = []
+        date_format = "%Y-%m-%d %H:%M:%S"
+        for i in range(topk):
+            cur_idx, _ = top_k_similar[i]
+            sim_chart_start = historical_data[cur_idx:cur_idx + 21].tolist()
+            sim_chart_end = historical_data[cur_idx + 21:cur_idx + 21 + 7].tolist()
+            date_start = [pd.Timestamp(ts).strftime(date_format) for ts in historical_date[cur_idx:cur_idx + 21]] # change date to human-readable format
+            date_end = [pd.Timestamp(ts).strftime(date_format) for ts in historical_date[cur_idx + 21:cur_idx + 21 + 7]]
+            results.append({
+                "chart_data_start": sim_chart_start,
+                "chart_data_end": sim_chart_end,
+                "date_start": date_start,
+                "date_end": date_end,
+            })
+
+        return JsonResponse({
+            'results': results,
+            'current_pattern': current_pattern.tolist(),
+            'current_datetime': current_datetime.tolist()})
+
 
 def nlp_views(request):
     return render(request, 'nlp_dashboard.html')

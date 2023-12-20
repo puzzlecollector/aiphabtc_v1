@@ -45,6 +45,8 @@ urlpatterns = [
          independent_indicator_views.fetch_ai_analysis, name='fetch_ai_analysis'),
     path('news_similarity/',
          nlp_dashboard_views.search_news, name="nlp_dashboard_search_news"),
+    path('search_chart_pattern/',
+         nlp_dashboard_views.search_chart_pattern, name="nlp_dashboard_search_chart_patterns"),
 ]
 
 handler404 = 'common.views.page_not_found'

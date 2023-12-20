@@ -79,8 +79,25 @@
                 <div id="results"></div>
             </div>
             <br>
-            <div class="sidebar-item">차트 패턴 매칭 지표</div>
-                <p>현재 가장 최근 차트 구간과 가장 유사한 차트 구간을 보여줍니다.</p>
+            <div class="sidebar-item">DTW 기반 차트 패턴 매칭 지표</div>
+                <p>현재 가장 최근 일봉 차트 구간과 가장 유사한 과거 일봉 차트 구간을 보여줍니다. <a href="https://arxiv.org/pdf/2308.08558.pdf">[참고 논문]</a></p>
+                <div>
+                    <label for="topKChartRange">조회할 상위 차트 결과 수 (5-20): </label>
+                    <input type="range" id="topKChartRange" name="topKChart" min="5" max="20" value="5">
+                    <span id="topKChartValue">5</span>
+                </div>
+                <div>
+                    <div style="text-align: center;"> <!-- Added inline CSS for center alignment -->
+                        <p><strong>현재 차트 종가 움직임</strong></p>
+                    </div>
+                    <div id="currentPatternInfo"></div>
+                    <div class="chart" id="currentPatternChart"></div>
+                </div>
+                <div>
+                    <button type="button" id="searchChartButton" class="btn btn-primary">검색</button>
+                </div>
+                <div id="chartLoading" style="display: none;">AI가 계산중입니다...</div>
+                <div id="chartResults"></div>
         </div>
     </div>
 </div>
@@ -172,6 +189,104 @@
     document.getElementById("topKRange").addEventListener("input", function() {
         document.getElementById("topKValue").innerText = this.value;
     });
+
+    document.getElementById("searchChartButton").addEventListener("click", function() {
+        document.getElementById("chartLoading").style.display = "block";
+        var topK = document.getElementById("topKChartRange").value;
+        var csrfToken = getCookie("csrftoken");
+
+        fetch("/search_chart_pattern/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ top_k: topK }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var resultsContainer = document.getElementById("chartResults");
+            resultsContainer.innerHTML = '';
+            data.results.forEach(function(result, index) {
+                var chartIdStart = `chartPatternStart${index}`;
+                var chartIdEnd = `chartPatternEnd${index}`;
+
+                var resultDiv = document.createElement('div');
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `
+                    <h5> DTW Based Pattern Rank ${index + 1} </h5>
+                    <div>DTW 유사 차트 패턴 구간:</div>
+                    <div class="chart" id="${chartIdStart}"></div>
+                    <div>DTW 유사 차트 패턴 구간 이후 움직임:</div>
+                    <div class="chart" id="${chartIdEnd}"></div>
+                `;
+                resultsContainer.appendChild(resultDiv);
+
+                plotChartPattern(chartIdStart, result.date_start, result.chart_data_start, 'rgba(255, 99, 132, 1)');
+                plotChartPattern(chartIdEnd, result.date_end, result.chart_data_end, 'rgba(75, 192, 192, 1)');
+            });
+
+            document.getElementById("chartLoading").style.display = "none";
+        })
+        .catch(error => {
+            console.error("Error fetching chart pattern matching results:", error);
+            document.getElementById("chartLoading").style.display = "none";
+        });
+    });
+
+    function plotChartPattern(chartId, xData, yData, lineColor) {
+        var chartDiv = document.getElementById(chartId);
+        Plotly.newPlot(chartDiv, [
+            {
+                type: 'scatter',
+                mode: 'lines',
+                x: xData,
+                y: yData,
+                line: { color: lineColor }
+            }
+        ], {
+            xaxis: { title: 'Time' },
+            yaxis: { title: 'Price' }
+        });
+    }
+
+    // Function to fetch and plot current chart pattern
+    function fetchAndPlotCurrentPattern() {
+        var topK = document.getElementById("topKChartRange").value;
+        var csrfToken = getCookie("csrftoken");
+
+        fetch("/search_chart_pattern/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ top_k: topK }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            var currentPatternInfo = document.getElementById("currentPatternInfo");
+            var currentPatternChartId = "currentPatternChart";
+            currentPatternInfo.innerHTML = '';
+
+            // Plot current pattern chart
+            plotChartPattern(currentPatternChartId, data.current_datetime, data.current_pattern, 'rgba(0, 123, 255, 1)');
+        })
+        .catch(error => {
+            console.error("Error fetching chart pattern matching results:", error);
+        });
+    }
+
+    window.onload = function() {
+        fetchAndPlotCurrentPattern();
+    };
+
+    // Add an event listener to update the displayed value when the slider changes
+    document.getElementById("topKChartRange").addEventListener("input", function() {
+        document.getElementById("topKChartValue").innerText = this.value;
+    });
+
+
 
     // Function to get a cookie by name
     function getCookie(name) {
